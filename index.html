@@ -1,0 +1,130 @@
+ <!DOCTYPE html>
+<html lang="it" id="html-root">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>To-Do Pro</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header con toggle modalità scura -->
+    <header>
+      <h1>🗓️ To-Do Pro</h1>
+      <button id="theme-toggle" class="theme-toggle" aria-label="Cambia tema">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"/>
+          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Form con input testo + date picker -->
+    <form id="todo-form" class="input-section">
+      <input
+        type="text"
+        id="todo-input"
+        placeholder="Cosa devi fare?"
+        autocomplete="off"
+        required
+      />
+      <input type="date" id="todo-date" />
+      <button type="submit" aria-label="Aggiungi compito">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </button>
+    </form>
+
+    <!-- Filtri -->
+    <!-- <div class="filters"> -->
+      <!-- <button class="filter-btn active" data-filter="all">Tutti</button> -->
+      <!-- <button class="filter-btn" data-filter="active">Da fare</button> -->
+      <!-- <button class="filter-btn" data-filter="completed">Completati</button> -->
+    <!-- </div> -->
+	<!-- <div class="category-filters" id="category-filters"> -->
+		<!-- <button class="category-filter-btn active" data-category="all">Tutte</button> -->
+	<!-- </div>	 -->
+	<!-- <div class="view-toggle"> -->
+		<!-- <button id="view-list" class="view-btn active">Lista</button> -->
+		<!-- <button id="view-calendar" class="view-btn">Calendario</button> -->
+	<!-- </div> -->
+	
+	<!-- Dropdown Filtri Compatti -->
+	<div class="compact-filters">
+	<!-- Filtro Stato -->
+	<div class="filter-dropdown">
+		<button class="dropdown-toggle" id="status-toggle" aria-label="Filtro stato">
+		<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+			<circle cx="12" cy="12" r="10"/>
+			<line x1="12" y1="8" x2="12" y2="12"/>
+			<line x1="12" y1="16" x2="12.01" y2="16"/>
+		</svg>
+		</button>
+		<div class="dropdown-menu" id="status-menu">
+		<div class="dropdown-item" data-value="all">Tutti</div>
+		<div class="dropdown-item" data-value="active">Da fare</div>
+		<div class="dropdown-item" data-value="completed">Completati</div>
+		</div>
+	</div>
+	
+	<!-- Filtro Categoria -->
+	<div class="filter-dropdown">
+		<button class="dropdown-toggle" id="category-toggle" aria-label="Filtro categoria">
+		<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+			<path d="M3 3v18h18"/>
+			<path d="M7 7h10M7 11h10M7 15h7"/>
+		</svg>
+		</button>
+		<div class="dropdown-menu" id="category-menu">
+		<div class="dropdown-item" data-value="all">Tutte</div>
+		<!-- Le categorie verranno inserite dinamicamente -->
+		</div>
+	</div>
+	
+	<!-- Filtro Vista -->
+	<div class="filter-dropdown">
+		<button class="dropdown-toggle" id="view-toggle" aria-label="Tipo vista">
+		<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+			<rect x="3" y="3" width="7" height="7"/>
+			<rect x="14" y="3" width="7" height="7"/>
+			<rect x="14" y="14" width="7" height="7"/>
+			<rect x="3" y="14" width="7" height="7"/>
+		</svg>
+		</button>
+		<div class="dropdown-menu" id="view-menu">
+		<div class="dropdown-item" data-value="list">Lista</div>
+		<div class="dropdown-item" data-value="calendar">Calendario</div>
+		</div>
+	</div>
+	</div>
+
+    <!-- Lista compiti -->
+    <div id="todo-container" class="todo-container"></div>
+
+    <!-- Stato vuoto -->
+    <div id="empty-state" class="empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+      <p>Nessun compito. Aggiungine uno!</p>
+    </div>
+  </div>
+  
+  <!-- Modale Categoria -->
+	<div id="category-modal" class="modal" style="display: none;">
+	<div class="modal-content">
+		<h3>Seleziona o crea una categoria</h3>
+		<input type="text" id="category-input" placeholder="Es. Lavoro, Studio, Personale..." />
+		<div id="category-suggestions" class="category-suggestions"></div>
+		<div class="modal-buttons">
+		<button id="cancel-category">Annulla</button>
+		<button id="confirm-category">Conferma</button>
+		</div>
+	</div>
+	</div>
+
+  <script src="script.js"></script>
+</body>
+</html>
