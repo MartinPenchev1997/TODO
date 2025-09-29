@@ -1,2 +1,2 @@
-// sw.js v.1
+// sw.js v.2
 self.addEventListener('fetch', () => {});
