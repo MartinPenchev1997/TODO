@@ -744,7 +744,8 @@ header h1 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  /* gap: 16px; */
+  gap: 0PX;
   width: 100%;
 }
 
@@ -752,7 +753,7 @@ header h1 {
 .compact-filters {
   display: flex;
   justify-content: center;
-  gap: 16px;
+  gap: 5PX;
   flex: 1;
 }
 

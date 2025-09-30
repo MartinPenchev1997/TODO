@@ -2,19 +2,19 @@
   "name": "To-Do Pro",
   "short_name": "To-Do",
   "description": "La tua lista delle cose da fare avanzata",
-  "start_url": "/TODO/",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#6366f1",
   "theme_color": "#6366f1",
   "icons": [
     {
-      "src": "list.png",
+      "src": "images.jpeg",
       "sizes": "192x192",
       "type": "image/png",
 	  "purpose": "any"
     },
     {
-      "src": "list.png",
+      "src": "images.jpeg",
       "sizes": "512x512",
       "type": "image/png",
 	  "purpose": "maskable"
