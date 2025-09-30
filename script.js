@@ -4,25 +4,208 @@ const themeToggle = document.getElementById('theme-toggle');
 const form = document.getElementById('todo-form');
 const input = document.getElementById('todo-input');
 const dateInput = document.getElementById('todo-date');
+const timeInput = document.getElementById('todo-time');
 const todoContainer = document.getElementById('todo-container');
 const emptyState = document.getElementById('empty-state');
+const resetFiltersBtn = document.getElementById('reset-filters');
+
+// Elementi navigazione calendario
+const calendarNavigation = document.getElementById('calendar-navigation');
+const prevMonthBtn = document.getElementById('prev-month');
+const nextMonthBtn = document.getElementById('next-month');
+const currentMonthYearSpan = document.getElementById('current-month-year');
+
+// Elementi modale categoria
+const categoryModal = document.getElementById('category-modal');
+const categoryInput = document.getElementById('category-input');
+const categoryRadios = document.querySelectorAll('input[name="category"]');
+const enableChecklistCheckbox = document.getElementById('enable-checklist');
+const checklistItems = document.getElementById('checklist-items');
+const checklistList = checklistItems?.querySelector('.checklist-list');
+const addChecklistBtn = checklistItems?.querySelector('.add-checklist-item');
+const checklistItemInput = checklistItems?.querySelector('.checklist-item-input');
+
+// Elementi modale dettaglio
+const detailModal = document.getElementById('detail-modal');
+const detailTitle = document.getElementById('detail-title');
+const detailCategory = document.getElementById('detail-category');
+const detailDate = document.getElementById('detail-date');
+const detailTime = document.getElementById('detail-time');
+const detailStatus = document.getElementById('detail-status');
+const detailChecklist = document.getElementById('detail-checklist');
+const detailChecklistItems = document.getElementById('detail-checklist-items');
+const closeDetailBtn = document.getElementById('close-detail');
+
+// Elementi modale notifiche
+const notificationToggleBtn = document.getElementById('notification-toggle');
+const notificationModal = document.getElementById('notification-modal');
+const closeNotificationBtn = document.getElementById('close-notification');
+const notificationEnabledCheckbox = document.getElementById('notification-enabled');
+const notificationTimeSelect = document.getElementById('notification-time');
+const saveNotificationBtn = document.getElementById('save-notification-settings');
 
 // ===== STATO =====
 let todos = JSON.parse(localStorage.getItem('todos')) || [];
 let currentFilter = 'all';          // 'all', 'active', 'completed'
 let currentCategoryFilter = 'all';  // 'all' o nome categoria
+let currentDayFilter = 'all';       // 'all', 'today', 'tomorrow', 'week'
 let currentView = 'list';           // 'list' o 'calendar'
+let currentDate = new Date();       // Per navigazione calendario
 let dragSrcEl = null;
 let tempTodo = null;
+let tempChecklistItems = [];
+let notificationPermission = false;
+let scheduledNotifications = new Map(); // Per tenere traccia delle notifiche schedulate
+let notificationSettings = {
+  enabled: false,
+  minutesBefore: 30
+};
 
 // ===== INIZIALIZZAZIONE =====
 const today = new Date().toISOString().split('T')[0];
 dateInput.value = today;
 dateInput.min = today;
 
+// Imposta ora attuale come default
+const now = new Date();
+const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+timeInput.value = currentTime;
+
 // Carica tema
 const savedTheme = localStorage.getItem('theme') || 'light';
 htmlRoot.setAttribute('data-theme', savedTheme);
+
+// Carica impostazioni notifiche
+// loadNotificationSettings();
+
+// // Inizializza notifiche
+// initializeNotifications();
+
+// ===== GESTIONE IMPOSTAZIONI NOTIFICHE =====
+function loadNotificationSettings() {
+  const saved = localStorage.getItem('notificationSettings');
+  if (saved) {
+    notificationSettings = JSON.parse(saved);
+  }
+  
+  // Aggiorna UI
+  if (notificationEnabledCheckbox) {
+    notificationEnabledCheckbox.checked = notificationSettings.enabled;
+  }
+  if (notificationTimeSelect) {
+    notificationTimeSelect.value = notificationSettings.minutesBefore.toString();
+  }
+}
+
+function saveNotificationSettings() {
+  notificationSettings.enabled = notificationEnabledCheckbox.checked;
+  notificationSettings.minutesBefore = parseInt(notificationTimeSelect.value);
+  
+  localStorage.setItem('notificationSettings', JSON.stringify(notificationSettings));
+  
+  // Ri-schedula tutte le notifiche con le nuove impostazioni
+  if (notificationSettings.enabled) {
+    rescheduleAllNotifications();
+  } else {
+    // Cancella tutte le notifiche se disabilitate
+    scheduledNotifications.forEach(timeoutId => clearTimeout(timeoutId));
+    scheduledNotifications.clear();
+  }
+}
+
+// ===== NOTIFICHE PUSH =====
+async function initializeNotifications() {
+  // Controlla se il browser supporta le notifiche
+  if (!('Notification' in window)) {
+    console.log('Questo browser non supporta le notifiche');
+    return;
+  }
+
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  if (isMobile) {
+    // Mostra il bottone notifiche su mobile
+    if (notificationToggleBtn) {
+      notificationToggleBtn.style.display = 'flex';
+    }
+    
+    // Richiedi permesso solo se l'utente ha abilitato le notifiche
+    if (notificationSettings.enabled) {
+      const permission = await Notification.requestPermission();
+      notificationPermission = permission === 'granted';
+      
+      if (notificationPermission) {
+        console.log('Notifiche abilitate per mobile');
+      }
+    }
+  }
+}
+
+function scheduleNotification(todo) {
+  if (!notificationPermission || !notificationSettings.enabled || !todo.time || !todo.date) return;
+  
+  const todoDateTime = new Date(`${todo.date}T${todo.time}`);
+  const notificationTime = new Date(todoDateTime.getTime() - notificationSettings.minutesBefore * 60 * 1000);
+  const now = new Date();
+  
+  // Se il momento della notifica è già passato, non schedularla
+  if (notificationTime <= now) return;
+  
+  const timeUntilNotification = notificationTime.getTime() - now.getTime();
+  
+  // Schedula la notifica
+  const timeoutId = setTimeout(() => {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      // Usa Service Worker per notifica più affidabile
+      navigator.serviceWorker.controller.postMessage({
+        type: 'SCHEDULE_NOTIFICATION',
+        todo: {
+          id: todo.id,
+          text: todo.text,
+          time: todo.time,
+          category: todo.category
+        }
+      });
+    } else {
+      // Fallback per notifica diretta
+      new Notification(`⏰ Task in scadenza!`, {
+        body: `"${todo.text}" è programmato per le ${todo.time}`,
+        icon: '/TODO/icon-192.png',
+        badge: '/TODO/icon-192.png',
+        tag: `todo-${todo.id}`,
+        data: { todoId: todo.id }
+      });
+    }
+    
+    // Rimuovi dalla mappa delle notifiche schedulate
+    scheduledNotifications.delete(todo.id);
+  }, timeUntilNotification);
+  
+  // Salva il timeout ID per poterlo cancellare se necessario
+  scheduledNotifications.set(todo.id, timeoutId);
+  
+  console.log(`Notifica schedulata per ${todo.text} alle ${notificationTime.toLocaleTimeString()}`);
+}
+
+function cancelNotification(todoId) {
+  if (scheduledNotifications.has(todoId)) {
+    clearTimeout(scheduledNotifications.get(todoId));
+    scheduledNotifications.delete(todoId);
+  }
+}
+
+function rescheduleAllNotifications() {
+  // Cancella tutte le notifiche esistenti
+  scheduledNotifications.forEach(timeoutId => clearTimeout(timeoutId));
+  scheduledNotifications.clear();
+  
+  // Ri-schedula le notifiche per tutti i task attivi
+  todos.forEach(todo => {
+    if (!todo.completed) {
+      scheduleNotification(todo);
+    }
+  });
+}
 
 // ===== UTILS =====
 function formatDate(dateStr) {
@@ -55,63 +238,31 @@ themeToggle.addEventListener('click', () => {
   localStorage.setItem('theme', newTheme);
 });
 
-// ===== FORM =====
-form.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const text = input.value.trim();
-  const date = dateInput.value;
-  if (text && date) {
-    tempTodo = { text, date };
-    openCategoryModal();
-  }
-});
+// ===== FORM ===== 
+// Form handler moved to end of file with enhanced functionality
 
 // ===== MODALE CATEGORIA =====
 function openCategoryModal() {
   const modal = document.getElementById('category-modal');
-  const catInput = document.getElementById('category-input');
-  const suggestions = document.getElementById('category-suggestions');
-
-  catInput.value = '';
-  suggestions.innerHTML = '';
-
-  const existingCategories = [...new Set(todos.map(t => t.category))];
-  existingCategories.forEach(cat => {
-    const btn = document.createElement('span');
-    btn.className = 'category-suggestion';
-    btn.textContent = cat;
-    btn.onclick = () => {
-      catInput.value = cat;
-      catInput.focus();
-    };
-    suggestions.appendChild(btn);
-  });
+  if (!modal) return;
+  
+  // Reset form
+  categoryRadios.forEach(radio => radio.checked = false);
+  if (categoryInput) {
+    categoryInput.value = '';
+    categoryInput.disabled = true;
+  }
+  if (enableChecklistCheckbox) enableChecklistCheckbox.checked = false;
+  if (checklistItems) checklistItems.style.display = 'none';
+  tempChecklistItems = [];
+  renderChecklistItems();
 
   modal.style.display = 'flex';
-  setTimeout(() => catInput.focus(), 300);
 }
 
-document.getElementById('cancel-category').onclick = () => {
-  document.getElementById('category-modal').style.display = 'none';
-  tempTodo = null;
-};
+// Cancel category handler - updated version at end of file
 
-document.getElementById('confirm-category').onclick = () => {
-  const category = document.getElementById('category-input').value.trim() || 'Generale';
-  if (tempTodo) {
-    todos.push({
-      text: tempTodo.text,
-      completed: false,
-      date: tempTodo.date,
-      category
-    });
-    saveAndRender();
-    input.value = '';
-    input.focus();
-  }
-  document.getElementById('category-modal').style.display = 'none';
-  tempTodo = null;
-};
+// Handler for confirm-category moved to end of file with new functionality
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
@@ -122,12 +273,27 @@ document.addEventListener('keydown', (e) => {
 
 // ===== AZIONI TODO =====
 function toggleComplete(index) {
-  todos[index].completed = !todos[index].completed;
+  const todo = todos[index];
+  todo.completed = !todo.completed;
+  
+  if (todo.completed) {
+    // Se completato, cancella la notifica
+    cancelNotification(todo.id);
+  } else {
+    // Se riattivato, ri-schedula la notifica
+    scheduleNotification(todo);
+  }
+  
   saveAndRender();
 }
 
 function deleteTodo(index) {
+  const todo = todos[index];
   const item = document.querySelector(`.todo-item[data-index="${index}"]`);
+  
+  // Cancella la notifica prima di eliminare
+  cancelNotification(todo.id);
+  
   if (item) {
     item.classList.add('leaving');
     item.addEventListener('animationend', () => {
@@ -138,46 +304,7 @@ function deleteTodo(index) {
 }
 
 // ===== DRAG & DROP =====
-function handleDragStart(e) {
-  dragSrcEl = this;
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/html', this.innerHTML);
-  setTimeout(() => this.style.opacity = '0.3', 0);
-}
-
-function handleDragOver(e) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-  return false;
-}
-
-function handleDragEnter(e) {
-  this.classList.add('drag-over');
-}
-
-function handleDragLeave() {
-  this.classList.remove('drag-over');
-}
-
-function handleDrop(e) {
-  e.stopPropagation();
-  if (dragSrcEl !== this) {
-    const srcIndex = parseInt(dragSrcEl.dataset.index);
-    const destIndex = parseInt(this.dataset.index);
-    [todos[srcIndex], todos[destIndex]] = [todos[destIndex], todos[srcIndex]];
-    dragSrcEl.dataset.index = destIndex;
-    this.dataset.index = srcIndex;
-    saveAndRender();
-  }
-  return false;
-}
-
-function handleDragEnd() {
-  this.style.opacity = '1';
-  document.querySelectorAll('.todo-item').forEach(item => {
-    item.classList.remove('drag-over');
-  });
-}
+// Drag & drop functions moved to end of file with mobile improvements
 
 // ===== RENDERING =====
 function renderTodos() {
@@ -185,6 +312,32 @@ function renderTodos() {
     if (currentFilter === 'active' && todo.completed) return false;
     if (currentFilter === 'completed' && !todo.completed) return false;
     if (currentCategoryFilter !== 'all' && todo.category !== currentCategoryFilter) return false;
+    
+    // Filtro per giorno
+    if (currentDayFilter !== 'all') {
+      const todoDate = new Date(todo.date);
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      const weekStart = new Date(today);
+      weekStart.setDate(today.getDate() - today.getDay());
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      
+      switch (currentDayFilter) {
+        case 'today':
+          if (todoDate.toDateString() !== today.toDateString()) return false;
+          break;
+        case 'tomorrow':
+          if (todoDate.toDateString() !== tomorrow.toDateString()) return false;
+          break;
+        case 'week':
+          if (todoDate < weekStart || todoDate > weekEnd) return false;
+          break;
+      }
+    }
+    
     return true;
   });
 
@@ -199,6 +352,11 @@ function renderTodos() {
 }
 
 function renderListView(todosToRender) {
+  // Nascondi controlli navigazione
+  if (calendarNavigation) {
+    calendarNavigation.style.display = 'none';
+  }
+  
   const grouped = groupTodosByDate(todosToRender);
   const sortedDates = Object.keys(grouped).sort((a, b) => {
     if (a === 'Oggi') return -1;
@@ -211,10 +369,16 @@ function renderListView(todosToRender) {
   sortedDates.forEach(dateLabel => {
     const section = document.createElement('div');
     section.className = 'day-section';
+    
+    // Make the entire section a drop zone
+    section.addEventListener('dragover', handleSectionDragOver);
+    section.addEventListener('dragleave', handleSectionDragLeave);
+    section.addEventListener('drop', handleSectionDrop);
 
     const header = document.createElement('div');
     header.className = 'day-header';
     header.textContent = dateLabel;
+    header.dataset.date = grouped[dateLabel][0].date; // Store the actual date
     section.appendChild(header);
 
     grouped[dateLabel].forEach(todo => {
@@ -223,13 +387,21 @@ function renderListView(todosToRender) {
       li.className = 'todo-item';
       li.draggable = true;
       li.dataset.index = globalIndex;
+      li.dataset.todoId = todo.id || globalIndex;
+      li.dataset.date = todo.date; // Store the todo's date
 
+      // Desktop drag events
       li.addEventListener('dragstart', handleDragStart);
       li.addEventListener('dragover', handleDragOver);
       li.addEventListener('dragenter', handleDragEnter);
       li.addEventListener('dragleave', handleDragLeave);
       li.addEventListener('drop', handleDrop);
       li.addEventListener('dragend', handleDragEnd);
+      
+      // Mobile touch events
+      li.addEventListener('touchstart', handleTouchStart, { passive: false });
+      li.addEventListener('touchmove', handleTouchMove, { passive: false });
+      li.addEventListener('touchend', handleTouchEnd, { passive: false });
 
       const todoContent = document.createElement('div');
       todoContent.className = 'todo-content';
@@ -239,12 +411,22 @@ function renderListView(todosToRender) {
       span.textContent = todo.text;
       if (todo.completed) span.classList.add('completed');
 
+      const metaDiv = document.createElement('div');
+      metaDiv.className = 'todo-meta';
+
       const categoryBadge = document.createElement('span');
       categoryBadge.className = 'category-badge';
       categoryBadge.textContent = todo.category;
 
+      const timeDiv = document.createElement('span');
+      timeDiv.className = 'todo-time';
+      timeDiv.textContent = todo.time || '00:00';
+
+      metaDiv.appendChild(categoryBadge);
+      metaDiv.appendChild(timeDiv);
+
       todoContent.appendChild(span);
-      todoContent.appendChild(categoryBadge);
+      todoContent.appendChild(metaDiv);
 
       const actionsDiv = document.createElement('div');
       actionsDiv.className = 'todo-actions';
@@ -269,7 +451,20 @@ function renderListView(todosToRender) {
       `;
       deleteBtn.onclick = () => deleteTodo(globalIndex);
 
+      const detailBtn = document.createElement('button');
+      detailBtn.className = 'action-btn detail-btn';
+      detailBtn.title = 'Dettagli';
+      detailBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="1"/>
+          <circle cx="19" cy="12" r="1"/>
+          <circle cx="5" cy="12" r="1"/>
+        </svg>
+      `;
+      detailBtn.onclick = () => showTodoDetail(globalIndex);
+
       actionsDiv.appendChild(completeBtn);
+      actionsDiv.appendChild(detailBtn);
       actionsDiv.appendChild(deleteBtn);
 
       li.appendChild(todoContent);
@@ -282,9 +477,14 @@ function renderListView(todosToRender) {
 }
 
 function renderCalendarView(todosToRender) {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
+  // Mostra controlli navigazione
+  if (calendarNavigation) {
+    calendarNavigation.style.display = 'flex';
+    updateCalendarNavigation();
+  }
+  
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
 
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
@@ -411,6 +611,14 @@ function updateCategoryMenu() {
   const menu = document.getElementById('category-menu');
   menu.innerHTML = '<div class="dropdown-item" data-value="all">Tutte</div>';
   
+  // Aggiungi listener per "Tutte"
+  const allItem = menu.querySelector('[data-value="all"]');
+  allItem.addEventListener('click', () => {
+    currentCategoryFilter = 'all';
+    closeAllMenus();
+    renderTodos();
+  });
+  
   const categories = [...new Set(todos.map(t => t.category))];
   categories.forEach(cat => {
     const item = document.createElement('div');
@@ -439,6 +647,729 @@ function saveAndRender() {
   renderTodos();
 }
 
+// ===== FILTRO GIORNO =====
+document.querySelectorAll('#day-menu .dropdown-item').forEach(item => {
+  item.addEventListener('click', () => {
+    currentDayFilter = item.dataset.value;
+    document.querySelectorAll('#day-menu .dropdown-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+    closeAllMenus();
+    renderTodos();
+  });
+});
+
+// ===== NAVIGAZIONE CALENDARIO =====
+prevMonthBtn?.addEventListener('click', () => {
+  currentDate.setMonth(currentDate.getMonth() - 1);
+  updateCalendarNavigation();
+  if (currentView === 'calendar') renderTodos();
+});
+
+nextMonthBtn?.addEventListener('click', () => {
+  currentDate.setMonth(currentDate.getMonth() + 1);
+  updateCalendarNavigation();
+  if (currentView === 'calendar') renderTodos();
+});
+
+function updateCalendarNavigation() {
+  if (currentMonthYearSpan) {
+    const options = { year: 'numeric', month: 'long' };
+    currentMonthYearSpan.textContent = currentDate.toLocaleDateString('it-IT', options);
+  }
+}
+
+// ===== RESET FILTRI =====
+resetFiltersBtn.addEventListener('click', () => {
+  currentFilter = 'all';
+  currentCategoryFilter = 'all';
+  currentDayFilter = 'all';
+  currentView = 'list';
+  
+  // Reset visual indicators
+  document.querySelectorAll('.dropdown-item').forEach(item => {
+    item.classList.remove('active');
+  });
+  
+  // Reset "all" items to active
+  document.querySelector('#status-menu [data-value="all"]').classList.add('active');
+  document.querySelector('#category-menu [data-value="all"]').classList.add('active');
+  document.querySelector('#day-menu [data-value="all"]').classList.add('active');
+  document.querySelector('#view-menu [data-value="list"]').classList.add('active');
+  
+  closeAllMenus();
+  renderTodos();
+});
+
+// ===== GESTIONE CATEGORIE RADIO BUTTONS =====
+categoryRadios.forEach(radio => {
+  radio.addEventListener('change', () => {
+    const customInput = document.getElementById('category-input');
+    if (radio.value === 'custom') {
+      customInput.disabled = false;
+      customInput.focus();
+    } else {
+      customInput.disabled = true;
+      customInput.value = '';
+    }
+  });
+});
+
+// ===== GESTIONE CHECKLIST =====
+enableChecklistCheckbox?.addEventListener('change', () => {
+  if (enableChecklistCheckbox.checked) {
+    if (checklistItems) checklistItems.style.display = 'block';
+    checklistItemInput?.focus();
+  } else {
+    if (checklistItems) checklistItems.style.display = 'none';
+    tempChecklistItems = [];
+    renderChecklistItems();
+  }
+});
+
+addChecklistBtn?.addEventListener('click', addChecklistItem);
+checklistItemInput?.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    addChecklistItem();
+  }
+});
+
+function addChecklistItem() {
+  if (!checklistItemInput) return;
+  const text = checklistItemInput.value.trim();
+  if (text) {
+    tempChecklistItems.push({ text, completed: false });
+    checklistItemInput.value = '';
+    renderChecklistItems();
+  }
+}
+
+function renderChecklistItems() {
+  if (!checklistList) return;
+  
+  checklistList.innerHTML = '';
+  tempChecklistItems.forEach((item, index) => {
+    const div = document.createElement('div');
+    div.className = 'checklist-list-item';
+    div.innerHTML = `
+      <span>${item.text}</span>
+      <button onclick="removeChecklistItem(${index})">×</button>
+    `;
+    checklistList.appendChild(div);
+  });
+}
+
+function removeChecklistItem(index) {
+  tempChecklistItems.splice(index, 1);
+  renderChecklistItems();
+}
+
+// ===== MODALE DETTAGLIO =====
+function showTodoDetail(todoIndex) {
+  const todo = todos[todoIndex];
+  if (!todo) return;
+  
+  detailTitle.textContent = todo.text;
+  detailCategory.textContent = todo.category;
+  detailDate.textContent = formatDate(todo.date);
+  detailTime.textContent = todo.time || '00:00';
+  detailStatus.textContent = todo.completed ? 'Completato' : 'Da fare';
+  
+  if (todo.checklist && todo.checklist.length > 0) {
+    detailChecklist.style.display = 'block';
+    detailChecklistItems.innerHTML = '';
+    
+    todo.checklist.forEach((item, index) => {
+      const div = document.createElement('div');
+      div.className = 'detail-checklist-item';
+      div.innerHTML = `
+        <input type="checkbox" ${item.completed ? 'checked' : ''} 
+               onchange="toggleChecklistItem(${todoIndex}, ${index})">
+        <span ${item.completed ? 'style="text-decoration: line-through;"' : ''}>${item.text}</span>
+      `;
+      detailChecklistItems.appendChild(div);
+    });
+  } else {
+    detailChecklist.style.display = 'none';
+  }
+  
+  detailModal.style.display = 'flex';
+}
+
+function toggleChecklistItem(todoIndex, itemIndex) {
+  todos[todoIndex].checklist[itemIndex].completed = !todos[todoIndex].checklist[itemIndex].completed;
+  
+  // Check if all checklist items are completed
+  const allCompleted = todos[todoIndex].checklist.every(item => item.completed);
+  if (allCompleted && !todos[todoIndex].completed) {
+    todos[todoIndex].completed = true;
+  } else if (!allCompleted && todos[todoIndex].completed) {
+    todos[todoIndex].completed = false;
+  }
+  
+  saveAndRender();
+  showTodoDetail(todoIndex); // Refresh the detail view
+}
+
+closeDetailBtn.addEventListener('click', () => {
+  detailModal.style.display = 'none';
+});
+
+// Chiudi modale dettaglio cliccando fuori
+detailModal.addEventListener('click', (e) => {
+  if (e.target === detailModal) {
+    detailModal.style.display = 'none';
+  }
+});
+
+// ===== AGGIORNAMENTO FORM SUBMIT =====
+// Modifica la gestione del form per includere categoria e checklist
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const text = input.value.trim();
+  const date = dateInput.value;
+  const time = timeInput.value;
+  
+  if (!text) return;
+  
+  // Se non è impostata una categoria, mostra la modale
+  if (!tempTodo || !tempTodo.category) {
+    tempTodo = { text, date, time };
+    openCategoryModal();
+    return;
+  }
+  
+  // Aggiungi il todo con categoria, ora e checklist
+  const newTodo = {
+    id: Date.now(),
+    text,
+    completed: false,
+    date,
+    time,
+    category: tempTodo.category,
+    checklist: tempTodo.checklist || []
+  };
+  
+  todos.push(newTodo);
+  
+  // Schedula notifica per il nuovo task
+  scheduleNotification(newTodo);
+  
+  input.value = '';
+  tempTodo = null;
+  tempChecklistItems = [];
+  
+  saveAndRender();
+});
+
+// ===== AGGIORNAMENTO MODALE CATEGORIA =====
+document.getElementById('confirm-category').addEventListener('click', () => {
+  let selectedCategory = '';
+  
+  // Check radio buttons
+  const selectedRadio = document.querySelector('input[name="category"]:checked');
+  if (selectedRadio) {
+    if (selectedRadio.value === 'custom') {
+      selectedCategory = categoryInput.value.trim() || 'Senza categoria';
+    } else {
+      selectedCategory = selectedRadio.value;
+    }
+  } else {
+    selectedCategory = 'Senza categoria';
+  }
+  
+  // Add category and checklist to tempTodo
+  if (tempTodo) {
+    tempTodo.category = selectedCategory;
+    if (enableChecklistCheckbox.checked) {
+      tempTodo.checklist = [...tempChecklistItems];
+    }
+  }
+  
+  categoryModal.style.display = 'none';
+  
+  // Reset form
+  categoryRadios.forEach(radio => radio.checked = false);
+  categoryInput.value = '';
+  categoryInput.disabled = true;
+  enableChecklistCheckbox.checked = false;
+  checklistItems.style.display = 'none';
+  tempChecklistItems = [];
+  renderChecklistItems();
+  
+  // Submit the form
+  if (tempTodo) {
+    form.dispatchEvent(new Event('submit'));
+  }
+});
+
+// ===== CANCEL CATEGORY HANDLER =====
+document.getElementById('cancel-category').addEventListener('click', () => {
+  categoryModal.style.display = 'none';
+  tempTodo = null;
+  
+  // Reset form
+  categoryRadios.forEach(radio => radio.checked = false);
+  categoryInput.value = '';
+  categoryInput.disabled = true;
+  enableChecklistCheckbox.checked = false;
+  checklistItems.style.display = 'none';
+  tempChecklistItems = [];
+  renderChecklistItems();
+});
+
+// ===== DRAG & DROP FUNZIONANTI =====
+let dragStartPos = { x: 0, y: 0 };
+let isDragging = false;
+let autoScrollInterval = null;
+let scrollContainer = null;
+
+function handleDragStart(e) {
+  dragSrcEl = this;
+  isDragging = true;
+  this.classList.add('dragging');
+  
+  // Initialize scroll container
+  if (!scrollContainer) {
+    scrollContainer = document.querySelector('.scrollable-content');
+  }
+  
+  // Store drag start position for mobile
+  const touch = e.touches ? e.touches[0] : e;
+  dragStartPos.x = touch.clientX;
+  dragStartPos.y = touch.clientY;
+  
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.innerHTML);
+  }
+  
+  console.log('Drag started for todo:', this.dataset.index);
+}
+
+function handleDragEnd(e) {
+  console.log('Drag ended');
+  isDragging = false;
+  
+  // Stop auto-scroll
+  clearAutoScroll();
+  
+  if (this.classList) {
+    this.classList.remove('dragging');
+  }
+  
+  // Reset all drag-over classes
+  document.querySelectorAll('.todo-item').forEach(item => {
+    item.classList.remove('drag-over');
+  });
+  
+  // Clear dragSrcEl after a small delay to let drop process
+  setTimeout(() => {
+    dragSrcEl = null;
+  }, 50);
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  if (e.dataTransfer) {
+    e.dataTransfer.dropEffect = 'move';
+  }
+  
+  // Update auto-scroll based on mouse position
+  updateAutoScroll(e.clientY);
+  
+  return false;
+}
+
+function handleDragEnter(e) {
+  e.preventDefault();
+  if (this !== dragSrcEl && isDragging) {
+    this.classList.add('drag-over');
+  }
+}
+
+function handleDragLeave(e) {
+  // Only remove class if we're actually leaving this element
+  const rect = this.getBoundingClientRect();
+  const x = e.clientX;
+  const y = e.clientY;
+  
+  if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+    this.classList.remove('drag-over');
+  }
+}
+
+function handleSectionDragLeave(e) {
+  // Only remove class if we're actually leaving this section
+  const rect = this.getBoundingClientRect();
+  const x = e.clientX;
+  const y = e.clientY;
+  
+  if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+    this.classList.remove('section-drag-over');
+  }
+}
+
+// ===== AUTO-SCROLL DURANTE DRAG & DROP =====
+function startAutoScroll(clientY) {
+  if (!scrollContainer) {
+    scrollContainer = document.querySelector('.scrollable-content');
+  }
+  
+  if (!scrollContainer || autoScrollInterval) return;
+  
+  const scrollRect = scrollContainer.getBoundingClientRect();
+  const scrollZone = 50; // Zona di 50px dai bordi dove inizia l'auto-scroll
+  const scrollSpeed = 5; // Velocità di scroll in pixel
+  
+  autoScrollInterval = setInterval(() => {
+    if (!isDragging) {
+      clearAutoScroll();
+      return;
+    }
+    
+    const distanceFromTop = clientY - scrollRect.top;
+    const distanceFromBottom = scrollRect.bottom - clientY;
+    
+    // Rimuovi tutte le classi degli indicatori prima di aggiornarle
+    scrollContainer.classList.remove('auto-scroll-up', 'auto-scroll-down');
+    
+    // Scroll verso l'alto
+    if (distanceFromTop < scrollZone && distanceFromTop > 0) {
+      const scrollAmount = Math.max(1, scrollSpeed * (scrollZone - distanceFromTop) / scrollZone);
+      scrollContainer.scrollTop -= scrollAmount;
+      scrollContainer.classList.add('auto-scroll-up');
+    }
+    // Scroll verso il basso
+    else if (distanceFromBottom < scrollZone && distanceFromBottom > 0) {
+      const scrollAmount = Math.max(1, scrollSpeed * (scrollZone - distanceFromBottom) / scrollZone);
+      scrollContainer.scrollTop += scrollAmount;
+      scrollContainer.classList.add('auto-scroll-down');
+    }
+    // Fuori dalla zona di scroll
+    else if (distanceFromTop <= 0 || distanceFromBottom <= 0) {
+      clearAutoScroll();
+    }
+  }, 16); // ~60fps
+}
+
+function clearAutoScroll() {
+  if (autoScrollInterval) {
+    clearInterval(autoScrollInterval);
+    autoScrollInterval = null;
+  }
+  // Rimuovi gli indicatori visivi
+  if (scrollContainer) {
+    scrollContainer.classList.remove('auto-scroll-up', 'auto-scroll-down');
+  }
+}
+
+function updateAutoScroll(clientY) {
+  if (!scrollContainer) {
+    scrollContainer = document.querySelector('.scrollable-content');
+  }
+  
+  if (!scrollContainer) return;
+  
+  const scrollRect = scrollContainer.getBoundingClientRect();
+  const scrollZone = 50;
+  
+  const distanceFromTop = clientY - scrollRect.top;
+  const distanceFromBottom = scrollRect.bottom - clientY;
+  
+  // Inizia auto-scroll se siamo nella zona critica
+  if ((distanceFromTop < scrollZone && distanceFromTop > 0) || 
+      (distanceFromBottom < scrollZone && distanceFromBottom > 0)) {
+    if (!autoScrollInterval) {
+      startAutoScroll(clientY);
+    }
+  } else {
+    clearAutoScroll();
+  }
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  
+  console.log('Drop event triggered on todo item');
+  
+  if (!dragSrcEl || dragSrcEl === this) {
+    return false;
+  }
+  
+  const dragIndex = parseInt(dragSrcEl.dataset.index);
+  const dropIndex = parseInt(this.dataset.index);
+  
+  console.log('Drag from index:', dragIndex, 'to index:', dropIndex);
+  
+  // Check if dragging between different dates
+  const dragDate = dragSrcEl.dataset.date;
+  const dropDate = this.dataset.date;
+  
+  if (dragDate !== dropDate) {
+    console.log('Cross-date drag detected, changing date from', dragDate, 'to', dropDate);
+    // Change the date of the dragged todo
+    todos[dragIndex].date = dropDate;
+  }
+  
+  // Validate indices
+  if (isNaN(dragIndex) || isNaN(dropIndex) || dragIndex === dropIndex) {
+    console.log('Invalid indices or same position');
+    return false;
+  }
+  
+  // Validate that indices exist in todos array
+  if (dragIndex >= todos.length || dropIndex >= todos.length || dragIndex < 0 || dropIndex < 0) {
+    console.log('Indices out of bounds');
+    return false;
+  }
+  
+  console.log('Performing reorder...');
+  
+  // Reorder todos array - use splice correctly
+  const draggedTodo = todos[dragIndex];
+  todos.splice(dragIndex, 1); // Remove from old position
+  
+  // Adjust dropIndex if needed (when dragging from lower to higher index)
+  const adjustedDropIndex = dragIndex < dropIndex ? dropIndex - 1 : dropIndex;
+  todos.splice(adjustedDropIndex, 0, draggedTodo); // Insert at new position
+  
+  console.log('Reorder completed, saving...');
+  
+  // Save and re-render
+  localStorage.setItem('todos', JSON.stringify(todos));
+  
+  // Clean up
+  this.classList.remove('drag-over');
+  isDragging = false;
+  
+  // Re-render to show new order
+  setTimeout(() => {
+    updateCategoryMenu();
+    renderTodos();
+  }, 50);
+  
+  return false;
+}
+
+// ===== DRAG & DROP TRA SEZIONI DIVERSE =====
+function handleSectionDragOver(e) {
+  e.preventDefault();
+  
+  // Update auto-scroll based on mouse position
+  updateAutoScroll(e.clientY);
+  
+  // Only allow drop if dragging over empty area of section
+  if (e.target.classList.contains('day-section') || e.target.classList.contains('day-header')) {
+    e.dataTransfer.dropEffect = 'move';
+    this.classList.add('section-drag-over');
+    return false;
+  }
+}
+
+function handleSectionDrop(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  
+  console.log('Drop event triggered on section');
+  
+  if (!dragSrcEl) {
+    return false;
+  }
+  
+  // Only handle drops on empty area of section or header
+  if (!e.target.classList.contains('day-section') && !e.target.classList.contains('day-header')) {
+    return false;
+  }
+  
+  const dragIndex = parseInt(dragSrcEl.dataset.index);
+  const targetDate = this.querySelector('.day-header').dataset.date;
+  const dragDate = dragSrcEl.dataset.date;
+  
+  console.log('Section drop: moving todo from', dragDate, 'to', targetDate);
+  
+  if (dragDate === targetDate) {
+    console.log('Same date, no change needed');
+    this.classList.remove('section-drag-over');
+    return false;
+  }
+  
+  // Validate index
+  if (isNaN(dragIndex) || dragIndex >= todos.length || dragIndex < 0) {
+    console.log('Invalid drag index');
+    this.classList.remove('section-drag-over');
+    return false;
+  }
+  
+  // Change the date of the dragged todo
+  todos[dragIndex].date = targetDate;
+  console.log('Date changed for todo:', todos[dragIndex].text);
+  
+  // Save and re-render
+  localStorage.setItem('todos', JSON.stringify(todos));
+  
+  // Clean up
+  this.classList.remove('section-drag-over');
+  document.querySelectorAll('.todo-item').forEach(item => {
+    item.classList.remove('drag-over', 'dragging');
+  });
+  isDragging = false;
+  dragSrcEl = null;
+  
+  // Re-render to show new grouping
+  setTimeout(() => {
+    updateCategoryMenu();
+    renderTodos();
+  }, 50);
+  
+  return false;
+}
+
+// ===== MOBILE TOUCH SUPPORT =====
+function handleTouchStart(e) {
+  if (e.touches.length === 1) {
+    const touch = e.touches[0];
+    dragStartPos.x = touch.clientX;
+    dragStartPos.y = touch.clientY;
+    
+    // Add visual feedback
+    this.classList.add('touch-active');
+    
+    // Start drag after a delay
+    setTimeout(() => {
+      if (this.classList.contains('touch-active')) {
+        handleDragStart.call(this, e);
+      }
+    }, 200);
+  }
+}
+
+function handleTouchMove(e) {
+  if (!isDragging) return;
+  
+  e.preventDefault();
+  const touch = e.touches[0];
+  const deltaX = Math.abs(touch.clientX - dragStartPos.x);
+  const deltaY = Math.abs(touch.clientY - dragStartPos.y);
+  
+  // Update auto-scroll for mobile
+  updateAutoScroll(touch.clientY);
+  
+  // Start dragging if moved enough
+  if (deltaX > 10 || deltaY > 10) {
+    this.classList.remove('touch-active');
+    
+    // Find element under touch
+    const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+    const todoItem = elementBelow?.closest('.todo-item');
+    const daySection = elementBelow?.closest('.day-section');
+    
+    // Remove all previous drag-over classes
+    document.querySelectorAll('.todo-item').forEach(item => {
+      item.classList.remove('drag-over');
+    });
+    document.querySelectorAll('.day-section').forEach(section => {
+      section.classList.remove('section-drag-over');
+    });
+    
+    if (todoItem && todoItem !== this) {
+      // Add to current todo item
+      todoItem.classList.add('drag-over');
+    } else if (daySection && !todoItem) {
+      // Add to day section
+      daySection.classList.add('section-drag-over');
+    }
+  }
+}
+
+function handleTouchEnd(e) {
+  this.classList.remove('touch-active');
+  
+  // Stop auto-scroll
+  clearAutoScroll();
+  
+  if (isDragging) {
+    const touch = e.changedTouches[0];
+    const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+    const todoItem = elementBelow?.closest('.todo-item');
+    const daySection = elementBelow?.closest('.day-section');
+    
+    if (todoItem && todoItem !== this) {
+      // Trigger drop on todo item
+      handleDrop.call(todoItem, e);
+    } else if (daySection && !todoItem) {
+      // Trigger drop on section (empty area or header)
+      handleSectionDrop.call(daySection, e);
+    }
+    
+    handleDragEnd.call(this, e);
+  }
+}
+
+// ===== FUNZIONI GLOBALI PER ONCLICK =====
+window.removeChecklistItem = removeChecklistItem;
+window.toggleChecklistItem = toggleChecklistItem;
+window.showTodoDetail = showTodoDetail;
+
+// ===== EVENT LISTENERS NOTIFICHE =====
+notificationToggleBtn?.addEventListener('click', () => {
+  notificationModal.style.display = 'flex';
+});
+
+closeNotificationBtn?.addEventListener('click', () => {
+  notificationModal.style.display = 'none';
+});
+
+notificationModal?.addEventListener('click', (e) => {
+  if (e.target === notificationModal) {
+    notificationModal.style.display = 'none';
+  }
+});
+
+saveNotificationBtn?.addEventListener('click', async () => {
+  // Se l'utente abilita le notifiche, richiedi permesso
+  if (notificationEnabledCheckbox.checked && !notificationPermission) {
+    const permission = await Notification.requestPermission();
+    notificationPermission = permission === 'granted';
+    
+    if (!notificationPermission) {
+      alert('Permessi notifiche negati. Le notifiche non funzioneranno.');
+      notificationEnabledCheckbox.checked = false;
+      return;
+    }
+  }
+  
+  saveNotificationSettings();
+  notificationModal.style.display = 'none';
+  
+  // Mostra messaggio di conferma
+  const message = notificationSettings.enabled 
+    ? `Notifiche abilitate! Riceverai un avviso ${notificationSettings.minutesBefore} minuti prima di ogni task.`
+    : 'Notifiche disabilitate.';
+  
+  // Potresti aggiungere un toast notification qui
+  console.log(message);
+});
+
+// ===== LISTENER MESSAGGI SERVICE WORKER =====
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', event => {
+    if (event.data && event.data.type === 'COMPLETE_TODO') {
+      // Trova e completa il todo
+      const todoIndex = todos.findIndex(t => t.id === event.data.todoId);
+      if (todoIndex !== -1) {
+        toggleComplete(todoIndex);
+      }
+    }
+  });
+}
+
 // Avvio
+updateCalendarNavigation();
 renderTodos();
+
+// Ri-schedula le notifiche all'avvio (in caso l'app sia stata chiusa e riaperta)
+setTimeout(() => {
+  rescheduleAllNotifications();
+}, 1000);
 updateCategoryMenu();
