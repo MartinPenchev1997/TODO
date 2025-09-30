@@ -10,14 +10,14 @@
     {
       "src": "images.jpeg",
       "sizes": "192x192",
-      "type": "image/png",
-	  "purpose": "any"
+      "type": "image/jpeg",
+      "purpose": "any"
     },
     {
       "src": "images.jpeg",
       "sizes": "512x512",
-      "type": "image/png",
-	  "purpose": "maskable"
+      "type": "image/jpeg",
+      "purpose": "maskable"
     }
   ]
 }

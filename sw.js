@@ -1,57 +1,57 @@
 // sw.js v.3 - Aggiunto supporto notifiche
-// const CACHE_NAME = 'todo-app-v3';
-// diomerda
-self.addEventListener('fetch', () => {});
+// const CACHE_NAME = "todo-app-v3";
+self.addEventListener("fetch", () => {});
 
 // // Gestione messaggi per notifiche
-// self.addEventListener('message', event => {
-//   if (event.data && event.data.type === 'SCHEDULE_NOTIFICATION') {
-//     const todo = event.data.todo;
-    
-//     // Mostra notifica immediata (viene chiamato al momento giusto)
+// self.addEventListener("message", (event) => {
+//   if (!event.data || event.data.type !== "SCHEDULE_NOTIFICATION") return;
+
+//   if (Notification.permission !== "granted") return;
+
+//   event.waitUntil(
 //     self.registration.showNotification(`⏰ Task in scadenza!`, {
-//       body: `"${todo.text}" è programmato per le ${todo.time}`,
-//       icon: '/TODO/icon-192.png',
-//       badge: '/TODO/icon-192.png',
-//       tag: `todo-${todo.id}`,
-//       data: { todoId: todo.id },
+//       body: `"${event.data.todo.text}" è programmato per le ${event.data.todo.time}`,
+//       icon: "/TODO/images.jpeg",
+//       badge: "/TODO/images.jpeg",
+//       tag: `todo-${event.data.todo.id}`,
+//       data: { todoId: event.data.todo.id },
 //       requireInteraction: true,
 //       actions: [
 //         {
-//           action: 'view',
-//           title: 'Visualizza'
+//           action: "view",
+//           title: "Visualizza",
 //         },
 //         {
-//           action: 'complete',
-//           title: 'Completa'
-//         }
-//       ]
-//     });
-//   }
+//           action: "complete",
+//           title: "Completa",
+//         },
+//       ],
+//     })
+//   );
 // });
 
 // // Gestione click sulla notifica
-// self.addEventListener('notificationclick', event => {
+// self.addEventListener("notificationclick", (event) => {
 //   event.notification.close();
-  
-//   if (event.action === 'complete') {
+
+//   if (event.action === "complete") {
 //     // Comunica al client di completare il task
-//     clients.matchAll().then(clientList => {
+//     clients.matchAll().then((clientList) => {
 //       if (clientList.length > 0) {
 //         clientList[0].postMessage({
-//           type: 'COMPLETE_TODO',
-//           todoId: event.notification.data.todoId
+//           type: "COMPLETE_TODO",
+//           todoId: event.notification.data.todoId,
 //         });
 //       }
 //     });
 //   } else {
 //     // Apri l'app
 //     event.waitUntil(
-//       clients.matchAll().then(clientList => {
+//       clients.matchAll().then((clientList) => {
 //         if (clientList.length > 0) {
 //           return clientList[0].focus();
 //         }
-//         return clients.openWindow('/TODO/');
+//         return clients.openWindow("/TODO/");
 //       })
 //     );
 //   }

@@ -1,284 +1,410 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it" id="html-root">
+
 <head>
-  	<meta charset="UTF-8" />
-  	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-	<meta name="theme-color" content="#6366f1">
-  	<title>Task List</title>
-  	<link rel="stylesheet" href="style.css" />
-	<link rel="icon" href="icon-192.png">
-	<link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#6366f1">
+  <title>Task List</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="images.jpeg">
+  <link rel="manifest" href="manifest.json">
 </head>
+
 <body>
   <div class="app-container">
     <!-- Sticky Header Section -->
     <div class="sticky-header">
-    <!-- Header con toggle modalità scura -->
-    <header>
-      <h1>🗓️ Task List</h1>
-      <div class="header-controls">
-        <button id="notification-toggle" class="theme-toggle" aria-label="Impostazioni notifiche" title="Notifiche" style="display: none;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-        </button>
-        <button id="theme-toggle" class="theme-toggle" aria-label="Cambia tema">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="5"/>
-            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-          </svg>
-        </button>
-      </div>
-    </header>
+      <!-- Header con toggle modalità scura -->
+      <header>
+        <h1>🗓️ Task List</h1>
+        <div class="header-controls">
+          <button id="notification-toggle" class="theme-toggle" aria-label="Impostazioni notifiche" title="Notifiche"
+            style="display: none;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+          </button>
+          <button id="theme-toggle" class="theme-toggle" aria-label="Cambia tema">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5" />
+              <path
+                d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+            </svg>
+          </button>
+        </div>
+      </header>
 
-    <!-- Form con input testo + date picker -->
-    <form id="todo-form" class="input-section">
-      <input
-        type="text"
-        id="todo-input"
-        placeholder="Cosa devi fare?"
-        autocomplete="off"
-        required
-      />
-      <div class="datetime-row">
-        <input type="date" id="todo-date" />
-        <input type="time" id="todo-time" />
-      </div>
-      
-      <!-- Controls Row: Submit + Filtri + Reset (DENTRO il form ma con type="button") -->
-      <div class="controls-row">
-        <button type="submit" aria-label="Aggiungi compito">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-        </button>
-        
-        <!-- Dropdown Filtri Compatti -->
-        <div class="compact-filters">
-        <!-- Filtro Stato -->
-        <div class="filter-dropdown">
-          <button type="button" class="dropdown-toggle" id="status-toggle" aria-label="Filtro stato">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          </button>
-          <div class="dropdown-menu" id="status-menu">
-          <div class="dropdown-item" data-value="all">Tutti</div>
-          <div class="dropdown-item" data-value="active">Da fare</div>
-          <div class="dropdown-item" data-value="completed">Completati</div>
+      <!-- Form con input testo + date picker -->
+      <form id="todo-form" class="input-section">
+        <input type="text" id="todo-input" placeholder="Cosa devi fare?" autocomplete="off" required />
+        <div class="datetime-compact">
+          <div class="datetime-input-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <input type="date" id="todo-date" />
+          </div>
+          <div class="datetime-input-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <input type="time" id="todo-time" />
           </div>
         </div>
-        
-        <!-- Filtro Categoria -->
-        <div class="filter-dropdown">
-          <button type="button" class="dropdown-toggle" id="category-toggle" aria-label="Filtro categoria">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 3v18h18"/>
-            <path d="M7 7h10M7 11h10M7 15h7"/>
-          </svg>
+
+        <!-- Controls Row: Submit + Filtri + Reset (DENTRO il form ma con type="button") -->
+        <div class="controls-row">
+          <button type="submit" aria-label="Aggiungi compito">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
           </button>
-          <div class="dropdown-menu" id="category-menu">
-          <div class="dropdown-item" data-value="all">Tutte</div>
-          <!-- Le categorie verranno inserite dinamicamente -->
+
+          <!-- Dropdown Filtri Compatti -->
+          <div class="compact-filters">
+            <!-- Toggle Stato -->
+            <button type="button" class="toggle-btn" id="status-toggle" data-state="active" aria-label="Toggle stato task">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" class="icon-active">
+                <circle cx="12" cy="12" r="10" />
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" class="icon-completed">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+            </button>
+
+            <!-- Filtro Categoria -->
+            <div class="filter-dropdown">
+              <button type="button" class="dropdown-toggle" id="category-toggle" aria-label="Filtro categoria">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
+                  <path d="M3 3v18h18" />
+                  <path d="M7 7h10M7 11h10M7 15h7" />
+                </svg>
+              </button>
+              <div class="dropdown-menu" id="category-menu">
+                <div class="dropdown-item" data-value="all">Tutte</div>
+                <!-- Le categorie verranno inserite dinamicamente -->
+              </div>
+            </div>
+
+            <!-- Filtro Giorno -->
+            <div class="filter-dropdown">
+              <button type="button" class="dropdown-toggle" id="day-toggle" aria-label="Filtro giorno">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+              </button>
+              <div class="dropdown-menu" id="day-menu">
+                <div class="dropdown-item" data-value="all">Tutti i giorni</div>
+                <div class="dropdown-item" data-value="today">Oggi</div>
+                <div class="dropdown-item" data-value="tomorrow">Domani</div>
+                <div class="dropdown-item" data-value="week">Questa settimana</div>
+              </div>
+            </div>
+
+            <!-- Toggle Vista -->
+            <button type="button" class="toggle-btn" id="view-toggle" data-view="list" aria-label="Toggle vista">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" class="icon-list">
+                <line x1="8" y1="6" x2="21" y2="6"/>
+                <line x1="8" y1="12" x2="21" y2="12"/>
+                <line x1="8" y1="18" x2="21" y2="18"/>
+                <line x1="3" y1="6" x2="3.01" y2="6"/>
+                <line x1="3" y1="12" x2="3.01" y2="12"/>
+                <line x1="3" y1="18" x2="3.01" y2="18"/>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" class="icon-calendar">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </button>
           </div>
-        </div>
-        
-        <!-- Filtro Giorno -->
-        <div class="filter-dropdown">
-          <button type="button" class="dropdown-toggle" id="day-toggle" aria-label="Filtro giorno">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-            <line x1="16" y1="2" x2="16" y2="6"/>
-            <line x1="8" y1="2" x2="8" y2="6"/>
-            <line x1="3" y1="10" x2="21" y2="10"/>
-          </svg>
+
+          <!-- Reset Filtri -->
+          <button type="button" id="reset-filters" class="reset-btn" aria-label="Pulisci filtri"
+            title="Pulisci tutti i filtri">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+              <path d="M21 3v5h-5" />
+              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+              <path d="M3 21v-5h5" />
+            </svg>
           </button>
-          <div class="dropdown-menu" id="day-menu">
-          <div class="dropdown-item" data-value="all">Tutti i giorni</div>
-          <div class="dropdown-item" data-value="today">Oggi</div>
-          <div class="dropdown-item" data-value="tomorrow">Domani</div>
-          <div class="dropdown-item" data-value="week">Questa settimana</div>
-          </div>
         </div>
-        
-        <!-- Filtro Vista -->
-        <div class="filter-dropdown">
-          <button type="button" class="dropdown-toggle" id="view-toggle" aria-label="Tipo vista">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="7" height="7"/>
-            <rect x="14" y="3" width="7" height="7"/>
-            <rect x="14" y="14" width="7" height="7"/>
-            <rect x="3" y="14" width="7" height="7"/>
-          </svg>
-          </button>
-          <div class="dropdown-menu" id="view-menu">
-          <div class="dropdown-item" data-value="list">Lista</div>
-          <div class="dropdown-item" data-value="calendar">Calendario</div>
-          </div>
-        </div>
-        </div>
-        
-        <!-- Reset Filtri -->
-        <button type="button" id="reset-filters" class="reset-btn" aria-label="Pulisci filtri" title="Pulisci tutti i filtri">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
-            <path d="M21 3v5h-5"/>
-            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
-            <path d="M3 21v-5h5"/>
-          </svg>
-        </button>
-      </div>
-    </form>
-	</div>
+      </form>
+    </div>
 
     <!-- Lista compiti scrollabile -->
     <div class="scrollable-content">
-    <!-- Controlli navigazione calendario -->
-    <div id="calendar-navigation" class="calendar-navigation" style="display: none;">
-      <button id="prev-month" class="nav-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="15,18 9,12 15,6"></polyline>
-        </svg>
-      </button>
-      <span id="current-month-year" class="month-year-display"></span>
-      <button id="next-month" class="nav-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="9,18 15,12 9,6"></polyline>
-        </svg>
-      </button>
-    </div>
-    <div id="todo-container" class="todo-container"></div>
+      <!-- Controlli navigazione calendario -->
+      <div id="calendar-navigation" class="calendar-navigation" style="display: none;">
+        <button id="prev-month" class="nav-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <polyline points="15,18 9,12 15,6"></polyline>
+          </svg>
+        </button>
+        <span id="current-month-year" class="month-year-display"></span>
+        <button id="next-month" class="nav-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <polyline points="9,18 15,12 9,6"></polyline>
+          </svg>
+        </button>
+      </div>
+      <div id="todo-container" class="todo-container"></div>
 
-    <!-- Stato vuoto -->
-    <div id="empty-state" class="empty-state">
-      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M12 5v14M5 12h14"/>
-      </svg>
-      <p>Nessun compito. Aggiungine uno!</p>
-    </div>
+      <!-- Stato vuoto -->
+      <div id="empty-state" class="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="1.5">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        <p>Nessun compito. Aggiungine uno!</p>
+      </div>
     </div>
   </div>
-  
+
   <!-- Modale Categoria -->
-	<div id="category-modal" class="modal" style="display: none;">
-	<div class="modal-content">
-		<h3>Seleziona o crea una categoria</h3>
-		
-		<!-- Categorie predefinite -->
-		<div class="category-options">
-			<div class="radio-group">
-				<input type="radio" id="cat-lavoro" name="category" value="Lavoro">
-				<label for="cat-lavoro">Lavoro</label>
-			</div>
-			<div class="radio-group">
-				<input type="radio" id="cat-studio" name="category" value="Studio">
-				<label for="cat-studio">Studio</label>
-			</div>
-			<div class="radio-group">
-				<input type="radio" id="cat-personale" name="category" value="Personale">
-				<label for="cat-personale">Personale</label>
-			</div>
-			<div class="radio-group">
-				<input type="radio" id="cat-spesa" name="category" value="Spesa">
-				<label for="cat-spesa">Spesa</label>
-			</div>
-			<div class="radio-group">
-				<input type="radio" id="cat-altro" name="category" value="Altro">
-				<label for="cat-altro">Altro</label>
-			</div>
-			<div class="radio-group">
-				<input type="radio" id="cat-custom" name="category" value="custom">
-				<label for="cat-custom">Personalizzata:</label>
-			</div>
-		</div>
-		
-		<input type="text" id="category-input" placeholder="Nome categoria personalizzata..." disabled />
-		
-		<!-- Opzione Checklist -->
-		<div class="checklist-option">
-			<input type="checkbox" id="enable-checklist">
-			<label for="enable-checklist">Crea come checklist di attività</label>
-		</div>
-		
-		<!-- Checklist Items -->
-		<div id="checklist-items" class="checklist-items" style="display: none;">
-			<div class="checklist-input-group">
-				<input type="text" class="checklist-item-input" placeholder="Attività...">
-				<button type="button" class="add-checklist-item">+</button>
-			</div>
-			<div class="checklist-list"></div>
-		</div>
-		
-		<div class="modal-buttons">
-		<button id="cancel-category">Annulla</button>
-		<button id="confirm-category">Conferma</button>
-		</div>
-	</div>
-	</div>
-	
-	<!-- Modale Dettaglio Task -->
-	<div id="detail-modal" class="modal" style="display: none;">
-	<div class="modal-content">
-		<div class="modal-header">
-			<h3 id="detail-title"></h3>
-			<button id="close-detail" class="close-btn">&times;</button>
-		</div>
-		<div class="detail-content">
-			<div class="detail-info">
-				<p><strong>Categoria:</strong> <span id="detail-category"></span></p>
-				<p><strong>Data:</strong> <span id="detail-date"></span></p>
-				<p><strong>Ora:</strong> <span id="detail-time"></span></p>
-				<p><strong>Stato:</strong> <span id="detail-status"></span></p>
-			</div>
-			<div id="detail-checklist" class="detail-checklist" style="display: none;">
-				<h4>Attività:</h4>
-				<div id="detail-checklist-items"></div>
-			</div>
-		</div>
-	</div>
-	</div>
-	
-	<!-- Modale Impostazioni Notifiche -->
-	<div id="notification-modal" class="modal" style="display: none;">
-	<div class="modal-content">
-		<div class="modal-header">
-			<h3>🔔 Impostazioni Notifiche</h3>
-			<button id="close-notification" class="close-btn">&times;</button>
-		</div>
-		<div class="notification-settings">
-			<div class="setting-group">
-				<label for="notification-enabled">
-					<input type="checkbox" id="notification-enabled">
-					Abilita notifiche (solo mobile)
-				</label>
-			</div>
-			<div class="setting-group">
-				<label for="notification-time">Preavviso notifica:</label>
-				<select id="notification-time">
-					<option value="5">5 minuti prima</option>
-					<option value="10">10 minuti prima</option>
-					<option value="15">15 minuti prima</option>
-					<option value="30" selected>30 minuti prima</option>
-					<option value="60">1 ora prima</option>
-				</select>
-			</div>
-			<div class="setting-info">
-				<p>💡 Le notifiche funzionano solo su dispositivi mobili e richiedono che l'app rimanga aperta nel browser.</p>
-			</div>
-		</div>
-		<div class="modal-buttons">
-			<button id="save-notification-settings">Salva Impostazioni</button>
-		</div>
-	</div>
-	</div>
+  <div id="category-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <h3>Seleziona o crea una categoria</h3>
+
+      <!-- Categorie predefinite -->
+      <div class="category-options">
+        <div class="radio-group">
+          <input type="radio" id="cat-lavoro" name="category" value="Lavoro">
+          <label for="cat-lavoro">Lavoro</label>
+        </div>
+        <div class="radio-group">
+          <input type="radio" id="cat-studio" name="category" value="Studio">
+          <label for="cat-studio">Studio</label>
+        </div>
+        <div class="radio-group">
+          <input type="radio" id="cat-personale" name="category" value="Personale">
+          <label for="cat-personale">Personale</label>
+        </div>
+        <div class="radio-group">
+          <input type="radio" id="cat-spesa" name="category" value="Spesa">
+          <label for="cat-spesa">Spesa</label>
+        </div>
+        <div class="radio-group">
+          <input type="radio" id="cat-altro" name="category" value="Altro">
+          <label for="cat-altro">Altro</label>
+        </div>
+        <div class="radio-group">
+          <input type="radio" id="cat-custom" name="category" value="custom">
+          <label for="cat-custom">Personalizzata:</label>
+        </div>
+      </div>
+
+      <input type="text" id="category-input" placeholder="Nome categoria personalizzata..." disabled />
+
+      <!-- Opzione Checklist -->
+      <div class="checklist-option">
+        <input type="checkbox" id="enable-checklist">
+        <label for="enable-checklist">Crea come checklist di attività</label>
+      </div>
+
+      <!-- Checklist Items -->
+      <div id="checklist-items" class="checklist-items" style="display: none;">
+        <div class="checklist-input-group">
+          <input type="text" class="checklist-item-input" placeholder="Attività...">
+          <button type="button" class="add-checklist-item">+</button>
+        </div>
+        <div class="checklist-list"></div>
+      </div>
+
+      <div class="modal-buttons">
+        <button id="cancel-category">Annulla</button>
+        <button id="confirm-category">Conferma</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale Dettaglio Task -->
+  <div id="detail-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="detail-title"></h3>
+        <button id="close-detail" class="close-btn">&times;</button>
+      </div>
+      <div class="detail-content">
+        <div class="detail-info">
+          <p><strong>Categoria:</strong> <span id="detail-category"></span></p>
+          <p><strong>Data:</strong> <span id="detail-date"></span></p>
+          <p><strong>Ora:</strong> <span id="detail-time"></span></p>
+          <p><strong>Stato:</strong> <span id="detail-status"></span></p>
+        </div>
+        <div id="detail-checklist" class="detail-checklist" style="display: none;">
+          <h4>Attività:</h4>
+          <div id="detail-checklist-items"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale Impostazioni Notifiche -->
+  <div id="notification-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🔔 Impostazioni Notifiche</h3>
+        <button id="close-notification" class="close-btn">&times;</button>
+      </div>
+      <div class="notification-settings">
+        <div class="setting-group">
+          <label for="notification-enabled">
+            <input type="checkbox" id="notification-enabled">
+            Abilita notifiche (solo mobile)
+          </label>
+        </div>
+        <div class="setting-group">
+          <label for="notification-time">Preavviso notifica:</label>
+          <select id="notification-time">
+            <option value="5">5 minuti prima</option>
+            <option value="10">10 minuti prima</option>
+            <option value="15">15 minuti prima</option>
+            <option value="30" selected>30 minuti prima</option>
+            <option value="60">1 ora prima</option>
+          </select>
+        </div>
+        <div class="setting-info">
+          <p>💡 Le notifiche funzionano solo su dispositivi mobili e richiedono che l'app rimanga aperta nel browser.
+          </p>
+        </div>
+      </div>
+      <div class="modal-buttons">
+        <button id="save-notification-settings">Salva Impostazioni</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale Modifica Task -->
+  <div id="edit-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>✏️ Modifica Task</h3>
+        <button id="close-edit" class="close-btn">&times;</button>
+      </div>
+      <div class="edit-form">
+        <div class="form-group">
+          <label for="edit-text">Cosa devi fare?</label>
+          <input type="text" id="edit-text" placeholder="Descrizione task..." required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="edit-date">Data</label>
+            <input type="date" id="edit-date" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-time">Ora</label>
+            <input type="time" id="edit-time" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="edit-category">Categoria</label>
+          <select id="edit-category">
+            <option value="Lavoro">Lavoro</option>
+            <option value="Studio">Studio</option>
+            <option value="Personale">Personale</option>
+            <option value="Spesa">Spesa</option>
+            <option value="Altro">Altro</option>
+          </select>
+        </div>
+        <div class="checklist-option">
+          <input type="checkbox" id="edit-has-checklist">
+          <label for="edit-has-checklist">Questo task ha una checklist</label>
+        </div>
+        <div id="edit-checklist-container" class="checklist-items" style="display: none;">
+          <div class="checklist-input-group">
+            <input type="text" id="edit-checklist-input" class="checklist-item-input" placeholder="Nuova attività...">
+            <button type="button" id="edit-add-checklist-item" class="add-checklist-item">+</button>
+          </div>
+          <div id="edit-checklist-list"></div>
+        </div>
+      </div>
+      <div class="modal-buttons">
+        <button id="cancel-edit">Annulla</button>
+        <button id="confirm-edit">Conferma</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Template per Todo Item -->
+  <template id="todo-item-template">
+    <li class="todo-item" draggable="true">
+      <div class="todo-content">
+        <span class="todo-text"></span>
+        <div class="todo-meta">
+          <span class="category-badge"></span>
+          <span class="todo-time"></span>
+        </div>
+      </div>
+      <div class="todo-actions">
+        <button class="action-btn menu-btn" data-action="menu">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="1"/>
+            <circle cx="19" cy="12" r="1"/>
+            <circle cx="5" cy="12" r="1"/>
+          </svg>
+        </button>
+        <div class="action-popover" style="display: none;">
+          <button class="popover-item complete-action" data-action="complete">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span class="action-label">Completa</span>
+          </button>
+          <button class="popover-item edit-action" data-action="edit">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            <span class="action-label">Modifica</span>
+          </button>
+          <button class="popover-item delete-action" data-action="delete">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+            <span class="action-label">Elimina</span>
+          </button>
+          <button class="popover-item detail-action" data-action="detail">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="16" x2="12" y2="12"/>
+              <line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+            <span class="action-label">Dettagli</span>
+          </button>
+        </div>
+      </div>
+    </li>
+  </template>
 
   <script src="script.js"></script>
 
-	<script>
+  <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/TODO/sw.js');
@@ -286,4 +412,5 @@
     }
   </script>
 </body>
+
 </html>

@@ -45,7 +45,8 @@ body {
   background: var(--card-bg);
   /* border-radius: var(--radius); */
   box-shadow: var(--shadow);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   /* height: calc(100vh - 32px); */
@@ -64,8 +65,10 @@ body {
 /* ===== SCROLLABLE CONTENT ===== */
 .scrollable-content {
   flex: 1;
-  overflow-y: auto;
+  overflow: visible;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ===== HEADER ===== */
@@ -130,13 +133,59 @@ header h1 {
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
 
+.datetime-compact {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.datetime-input-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--card-bg);
+  transition: var(--transition);
+}
+
+.datetime-input-wrapper svg {
+  color: var(--text-light);
+  flex-shrink: 0;
+}
+
+.datetime-input-wrapper:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.datetime-input-wrapper:focus-within svg {
+  color: var(--primary);
+}
+
+#todo-date, #todo-time {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  outline: none;
+  padding: 0;
+  min-width: 0;
+}
+
+/* Fallback per vecchio codice */
 .datetime-row {
   display: flex;
   gap: 12px;
   width: 100%;
 }
 
-#todo-date, #todo-time {
+.datetime-row #todo-date, 
+.datetime-row #todo-time {
   flex: 1;
   padding: 12px;
   border: 2px solid var(--border);
@@ -147,7 +196,8 @@ header h1 {
   cursor: pointer;
 }
 
-#todo-date:focus, #todo-time:focus {
+.datetime-row #todo-date:focus, 
+.datetime-row #todo-time:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
   outline: none;
@@ -174,70 +224,18 @@ header h1 {
   transform: scale(1.05);
 }
 
-/* ===== FILTRI ===== */
-/* .filters { */
-  /* display: flex; */
-  /* padding: 0 20px 16px; */
-  /* gap: 8px; */
-  /* flex-wrap: wrap; */
-/* } */
-
-.filter-btn {
-  flex: 1;
-  min-width: 80px;
-  padding: 8px 12px;
-  border: 2px solid var(--border);
-  border-radius: 12px;
-  background: transparent;
-  color: var(--text-light);
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.filter-btn.active,
-.filter-btn:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-  background: rgba(99, 102, 241, 0.08);
-}
-
-[data-theme="dark"] .filter-btn.active,
-[data-theme="dark"] .filter-btn:hover {
-  background: rgba(99, 102, 241, 0.2);
-}
-
-.view-btn {
-  flex: 1;
-  padding: 8px;
-  border: 2px solid var(--border);
-  border-radius: 12px;
-  background: transparent;
-  color: var(--text-light);
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.view-btn.active,
-.view-btn:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-  background: rgba(99, 102, 241, 0.08);
-}
-
-[data-theme="dark"] .view-btn.active,
-[data-theme="dark"] .view-btn:hover {
-  background: rgba(99, 102, 241, 0.2);
-}
-
 /* ===== CONTAINER LISTA ===== */
 .todo-container {
   padding: 0 20px 20px;
   min-height: 100px;
+  overflow: visible;
+  flex: 1;
 }
 
 .day-section {
   margin-bottom: 24px;
+  position: relative;
+  overflow: visible;
 }
 
 .day-header {
@@ -265,11 +263,13 @@ header h1 {
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   animation: fadeIn 0.3s ease-out;
   transition: var(--transition);
-  cursor: grab;
+  position: relative;
+  overflow: visible;
+  z-index: 1;
 }
 
-.todo-item:active {
-  cursor: grabbing;
+.todo-item.popover-open {
+  z-index: 10000;
 }
 
 .todo-text {
@@ -357,14 +357,6 @@ header h1 {
 
   #todo-input, #todo-date {
     width: 100%;
-  }
-
-  .filters {
-    justify-content: center;
-  }
-
-  .filter-btn {
-    flex: none;
   }
 }
 
@@ -519,27 +511,6 @@ header h1 {
   margin-bottom: 16px;
 }
 
-.category-suggestions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.category-suggestion {
-  background: var(--primary);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.category-suggestion:hover {
-  opacity: 0.9;
-}
-
 .modal-buttons {
   display: flex;
   gap: 10px;
@@ -677,29 +648,6 @@ header h1 {
   font-size: 1rem;
 }
 
-.category-filter-btn {
-  padding: 6px 12px;
-  border: 2px solid var(--border);
-  border-radius: 20px;
-  background: transparent;
-  color: var(--text-light);
-  font-size: 0.85rem;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.category-filter-btn.active,
-.category-filter-btn:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-  background: rgba(99, 102, 241, 0.08);
-}
-
-[data-theme="dark"] .category-filter-btn.active,
-[data-theme="dark"] .category-filter-btn:hover {
-  background: rgba(99, 102, 241, 0.2);
-}
-
 /* ===== CALENDAR NAVIGATION ===== */
 .calendar-navigation {
   display: flex;
@@ -790,6 +738,48 @@ header h1 {
   position: relative;
 }
 
+.toggle-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text);
+  position: relative;
+}
+
+.toggle-btn:hover {
+  border-color: var(--primary);
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.toggle-btn svg {
+  position: absolute;
+  display: none;
+}
+
+.toggle-btn[data-state="active"] .icon-active {
+  display: block !important;
+}
+
+.toggle-btn[data-state="completed"] .icon-completed {
+  display: block !important;
+}
+
+.toggle-btn[data-view="list"] .icon-list {
+  display: block !important;
+}
+
+.toggle-btn[data-view="calendar"] .icon-calendar {
+  display: block !important;
+}
+
+/* Fallback per dropdown esistenti */
 .dropdown-toggle {
   width: 44px;
   height: 44px;
@@ -981,23 +971,29 @@ header h1 {
 .todo-item {
   touch-action: none;
   user-select: none;
-  cursor: grab;
   transition: var(--transition);
 }
 
-.todo-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-}
-
-.todo-item:active {
-  cursor: grabbing;
+/* Cursori grab/grabbing solo su desktop con mouse */
+@media (hover: hover) and (pointer: fine) {
+  .todo-item {
+    cursor: grab;
+  }
+  
+  .todo-item.dragging {
+    cursor: grabbing;
+  }
+  
+  /* Hover solo su dispositivi con mouse preciso, non su touch o quando è attivo */
+  .todo-item:not(.touch-active):not(.dragging):not(.popover-open):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  }
 }
 
 .todo-item.dragging {
   opacity: 0.5;
   transform: rotate(5deg);
-  cursor: grabbing;
   z-index: 1000;
 }
 
@@ -1090,6 +1086,186 @@ header h1 {
   100% { transform: scale(1); opacity: 0.8; }
 }
 
+/* ===== MODALE MODIFICA ===== */
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group input[type="time"],
+.form-group select {
+  padding: 10px 12px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--text);
+  font-size: 0.95rem;
+  transition: var(--transition);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  outline: none;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-group input[type="checkbox"] {
+  width: auto;
+  margin-right: 8px;
+}
+
+#edit-checklist-container {
+  background: var(--bg);
+  padding: 12px;
+  border-radius: 10px;
+}
+
+#edit-checklist-list {
+  margin-top: 12px;
+}
+
+/* ===== ACTION POPOVER ===== */
+.todo-actions {
+  position: relative;
+  overflow: visible;
+  z-index: 10;
+}
+
+.menu-btn {
+  color: var(--text);
+}
+
+.menu-btn:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.menu-btn:focus {
+  outline: none;
+}
+
+.menu-btn:active {
+  transform: scale(0.95);
+}
+
+.action-popover {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  min-width: 180px;
+  max-height: 300px;
+  overflow: visible;
+  border: 1px solid var(--border);
+  animation: popoverSlideIn 0.2s ease-out;
+}
+
+[data-theme="dark"] .action-popover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes popoverSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.popover-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: left;
+  font-size: 0.95rem;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+
+.popover-item:last-child {
+  border-bottom: none;
+}
+
+.popover-item:hover {
+  background: var(--bg);
+}
+
+.popover-item svg {
+  flex-shrink: 0;
+}
+
+.action-label {
+  flex: 1;
+  font-weight: 500;
+}
+
+/* Colori specifici per le azioni */
+.complete-action svg {
+  color: var(--success);
+}
+
+.complete-action:hover {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.edit-action svg {
+  color: var(--primary);
+}
+
+.edit-action:hover {
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.delete-action svg {
+  color: var(--danger);
+}
+
+.delete-action:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.detail-action svg {
+  color: var(--text-light);
+}
+
+.detail-action:hover {
+  background: rgba(107, 114, 128, 0.1);
+}
+
 /* ===== RESPONSIVE IMPROVEMENTS ===== */
 @media (max-width: 520px) {
   .datetime-row {
@@ -1130,5 +1306,9 @@ header h1 {
   .month-year-display {
     font-size: 1rem;
     min-width: 120px;
+  }
+  
+  .action-popover {
+    right: -8px;
   }
 }

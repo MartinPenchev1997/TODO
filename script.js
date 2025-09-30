@@ -8,6 +8,7 @@ const timeInput = document.getElementById('todo-time');
 const todoContainer = document.getElementById('todo-container');
 const emptyState = document.getElementById('empty-state');
 const resetFiltersBtn = document.getElementById('reset-filters');
+const todoItemTemplate = document.getElementById('todo-item-template');
 
 // Elementi navigazione calendario
 const calendarNavigation = document.getElementById('calendar-navigation');
@@ -44,9 +45,24 @@ const notificationEnabledCheckbox = document.getElementById('notification-enable
 const notificationTimeSelect = document.getElementById('notification-time');
 const saveNotificationBtn = document.getElementById('save-notification-settings');
 
+// Elementi modale modifica
+const editModal = document.getElementById('edit-modal');
+const editText = document.getElementById('edit-text');
+const editDate = document.getElementById('edit-date');
+const editTime = document.getElementById('edit-time');
+const editCategory = document.getElementById('edit-category');
+const editHasChecklist = document.getElementById('edit-has-checklist');
+const editChecklistContainer = document.getElementById('edit-checklist-container');
+const editChecklistInput = document.getElementById('edit-checklist-input');
+const editAddChecklistBtn = document.getElementById('edit-add-checklist-item');
+const editChecklistList = document.getElementById('edit-checklist-list');
+const closeEditBtn = document.getElementById('close-edit');
+const cancelEditBtn = document.getElementById('cancel-edit');
+const confirmEditBtn = document.getElementById('confirm-edit');
+
 // ===== STATO =====
 let todos = JSON.parse(localStorage.getItem('todos')) || [];
-let currentFilter = 'all';          // 'all', 'active', 'completed'
+let currentFilter = 'active';       // 'active', 'completed' (rimosso 'all')
 let currentCategoryFilter = 'all';  // 'all' o nome categoria
 let currentDayFilter = 'all';       // 'all', 'today', 'tomorrow', 'week'
 let currentView = 'list';           // 'list' o 'calendar'
@@ -54,6 +70,8 @@ let currentDate = new Date();       // Per navigazione calendario
 let dragSrcEl = null;
 let tempTodo = null;
 let tempChecklistItems = [];
+let editingTodoIndex = null;
+let editTempChecklistItems = [];
 let notificationPermission = false;
 let scheduledNotifications = new Map(); // Per tenere traccia delle notifiche schedulate
 let notificationSettings = {
@@ -78,7 +96,7 @@ htmlRoot.setAttribute('data-theme', savedTheme);
 // Carica impostazioni notifiche
 // loadNotificationSettings();
 
-// // Inizializza notifiche
+// Inizializza notifiche
 // initializeNotifications();
 
 // ===== GESTIONE IMPOSTAZIONI NOTIFICHE =====
@@ -154,24 +172,26 @@ function scheduleNotification(todo) {
   const timeUntilNotification = notificationTime.getTime() - now.getTime();
   
   // Schedula la notifica
-  const timeoutId = setTimeout(() => {
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-      // Usa Service Worker per notifica più affidabile
-      navigator.serviceWorker.controller.postMessage({
-        type: 'SCHEDULE_NOTIFICATION',
-        todo: {
-          id: todo.id,
-          text: todo.text,
-          time: todo.time,
-          category: todo.category
-        }
+  const timeoutId = setTimeout(async () => {
+    let deliveredToSW = false;
+
+    try {
+      deliveredToSW = await dispatchNotificationToSW({
+        id: todo.id,
+        text: todo.text,
+        time: todo.time,
+        category: todo.category,
       });
-    } else {
+    } catch (error) {
+      console.error('Invio notifica al Service Worker fallito:', error);
+    }
+
+    if (!deliveredToSW) {
       // Fallback per notifica diretta
       new Notification(`⏰ Task in scadenza!`, {
         body: `"${todo.text}" è programmato per le ${todo.time}`,
-        icon: '/TODO/icon-192.png',
-        badge: '/TODO/icon-192.png',
+        icon: '/TODO/images.jpeg',
+        badge: '/TODO/images.jpeg',
         tag: `todo-${todo.id}`,
         data: { todoId: todo.id }
       });
@@ -185,6 +205,20 @@ function scheduleNotification(todo) {
   scheduledNotifications.set(todo.id, timeoutId);
   
   console.log(`Notifica schedulata per ${todo.text} alle ${notificationTime.toLocaleTimeString()}`);
+}
+
+async function dispatchNotificationToSW(todo) {
+  if (!('serviceWorker' in navigator)) return null;
+
+  const registration = await navigator.serviceWorker.ready;
+  if (!registration.active) return null;
+
+  registration.active.postMessage({
+    type: 'SCHEDULE_NOTIFICATION',
+    todo,
+  });
+
+  return true;
 }
 
 function cancelNotification(todoId) {
@@ -303,6 +337,57 @@ function deleteTodo(index) {
   }
 }
 
+function editTodo(index) {
+  const todo = todos[index];
+  editingTodoIndex = index;
+  
+  // Popola i campi della modale
+  editText.value = todo.text;
+  editDate.value = todo.date;
+  editTime.value = todo.time;
+  editCategory.value = todo.category;
+  
+  // Gestione checklist
+  editTempChecklistItems = todo.checklist ? [...todo.checklist] : [];
+  editHasChecklist.checked = editTempChecklistItems.length > 0;
+  editChecklistContainer.style.display = editTempChecklistItems.length > 0 ? 'block' : 'none';
+  renderEditChecklistItems();
+  
+  // Mostra modale
+  editModal.style.display = 'flex';
+}
+
+function renderEditChecklistItems() {
+  editChecklistList.innerHTML = '';
+  editTempChecklistItems.forEach((item, index) => {
+    const div = document.createElement('div');
+    div.className = 'checklist-list-item';
+    
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = item.completed;
+    checkbox.addEventListener('change', () => {
+      editTempChecklistItems[index].completed = checkbox.checked;
+    });
+    
+    const span = document.createElement('span');
+    span.textContent = item.text;
+    if (item.completed) span.style.textDecoration = 'line-through';
+    
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = '×';
+    removeBtn.addEventListener('click', () => {
+      editTempChecklistItems.splice(index, 1);
+      renderEditChecklistItems();
+    });
+    
+    div.appendChild(checkbox);
+    div.appendChild(span);
+    div.appendChild(removeBtn);
+    editChecklistList.appendChild(div);
+  });
+}
+
 // ===== DRAG & DROP =====
 // Drag & drop functions moved to end of file with mobile improvements
 
@@ -383,12 +468,14 @@ function renderListView(todosToRender) {
 
     grouped[dateLabel].forEach(todo => {
       const globalIndex = todos.findIndex(t => t === todo);
-      const li = document.createElement('li');
-      li.className = 'todo-item';
-      li.draggable = true;
+      
+      // Clona il template
+      const li = todoItemTemplate.content.cloneNode(true).querySelector('.todo-item');
+      
+      // Imposta i dati
       li.dataset.index = globalIndex;
       li.dataset.todoId = todo.id || globalIndex;
-      li.dataset.date = todo.date; // Store the todo's date
+      li.dataset.date = todo.date;
 
       // Desktop drag events
       li.addEventListener('dragstart', handleDragStart);
@@ -403,72 +490,104 @@ function renderListView(todosToRender) {
       li.addEventListener('touchmove', handleTouchMove, { passive: false });
       li.addEventListener('touchend', handleTouchEnd, { passive: false });
 
-      const todoContent = document.createElement('div');
-      todoContent.className = 'todo-content';
+      // Popola i contenuti
+      const todoText = li.querySelector('.todo-text');
+      todoText.textContent = todo.text;
+      if (todo.completed) todoText.classList.add('completed');
 
-      const span = document.createElement('span');
-      span.className = 'todo-text';
-      span.textContent = todo.text;
-      if (todo.completed) span.classList.add('completed');
-
-      const metaDiv = document.createElement('div');
-      metaDiv.className = 'todo-meta';
-
-      const categoryBadge = document.createElement('span');
-      categoryBadge.className = 'category-badge';
+      const categoryBadge = li.querySelector('.category-badge');
       categoryBadge.textContent = todo.category;
 
-      const timeDiv = document.createElement('span');
-      timeDiv.className = 'todo-time';
-      timeDiv.textContent = todo.time || '00:00';
+      const todoTime = li.querySelector('.todo-time');
+      todoTime.textContent = todo.time || '00:00';
 
-      metaDiv.appendChild(categoryBadge);
-      metaDiv.appendChild(timeDiv);
+      // Configura popover e azioni
+      const menuBtn = li.querySelector('.menu-btn');
+      const popover = li.querySelector('.action-popover');
+      
+      // Assicurati che il popover parta sempre chiuso
+      popover.style.display = 'none';
+      
+      // Reset completo dello stato del menu button
+      menuBtn.blur();
+      li.classList.remove('popover-open');
+      
+      // Previeni drag quando si interagisce con tutto il container delle azioni
+      const todoActions = li.querySelector('.todo-actions');
+      todoActions.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+      });
+      
+      todoActions.addEventListener('dragstart', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+      
+      // Gestione apertura/chiusura popover
+      menuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        
+        // Chiudi tutti gli altri popover e rimuovi classe popover-open
+        document.querySelectorAll('.todo-item').forEach(item => {
+          item.classList.remove('popover-open');
+        });
+        document.querySelectorAll('.action-popover').forEach(p => {
+          if (p !== popover) p.style.display = 'none';
+        });
+        
+        // Toggle questo popover
+        const isOpen = popover.style.display === 'block';
+        popover.style.display = isOpen ? 'none' : 'block';
+        
+        // Aggiungi/rimuovi classe per z-index
+        if (!isOpen) {
+          li.classList.add('popover-open');
+        } else {
+          li.classList.remove('popover-open');
+          menuBtn.blur(); // Rimuovi focus quando chiudi
+        }
+      });
 
-      todoContent.appendChild(span);
-      todoContent.appendChild(metaDiv);
+      // Configura azioni del popover
+      const completeAction = li.querySelector('.complete-action');
+      const completeLabel = completeAction.querySelector('.action-label');
+      const completeSvg = completeAction.querySelector('svg');
+      
+      if (todo.completed) {
+        completeLabel.textContent = 'Ripristina';
+        completeSvg.innerHTML = '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>';
+      } else {
+        completeLabel.textContent = 'Completa';
+      }
+      
+      const editAction = li.querySelector('.edit-action');
+      const deleteAction = li.querySelector('.delete-action');
+      const detailAction = li.querySelector('.detail-action');
+      
+      completeAction.addEventListener('click', () => {
+        toggleComplete(globalIndex);
+        popover.style.display = 'none';
+        li.classList.remove('popover-open');
+      });
+      
+      editAction.addEventListener('click', () => {
+        editTodo(globalIndex);
+        popover.style.display = 'none';
+        li.classList.remove('popover-open');
+      });
+      
+      deleteAction.addEventListener('click', () => {
+        deleteTodo(globalIndex);
+        popover.style.display = 'none';
+        li.classList.remove('popover-open');
+      });
+      
+      detailAction.addEventListener('click', () => {
+        showTodoDetail(globalIndex);
+        popover.style.display = 'none';
+        li.classList.remove('popover-open');
+      });
 
-      const actionsDiv = document.createElement('div');
-      actionsDiv.className = 'todo-actions';
-
-      const completeBtn = document.createElement('button');
-      completeBtn.className = 'action-btn complete-btn';
-      completeBtn.title = todo.completed ? 'Ripristina' : 'Completa';
-      completeBtn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          ${todo.completed ? '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>' : '<polyline points="20 6 9 17 4 12"/>'}
-        </svg>
-      `;
-      completeBtn.onclick = () => toggleComplete(globalIndex);
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'action-btn delete-btn';
-      deleteBtn.title = 'Elimina';
-      deleteBtn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-        </svg>
-      `;
-      deleteBtn.onclick = () => deleteTodo(globalIndex);
-
-      const detailBtn = document.createElement('button');
-      detailBtn.className = 'action-btn detail-btn';
-      detailBtn.title = 'Dettagli';
-      detailBtn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="1"/>
-          <circle cx="19" cy="12" r="1"/>
-          <circle cx="5" cy="12" r="1"/>
-        </svg>
-      `;
-      detailBtn.onclick = () => showTodoDetail(globalIndex);
-
-      actionsDiv.appendChild(completeBtn);
-      actionsDiv.appendChild(detailBtn);
-      actionsDiv.appendChild(deleteBtn);
-
-      li.appendChild(todoContent);
-      li.appendChild(actionsDiv);
       section.appendChild(li);
     });
 
@@ -496,7 +615,7 @@ function renderCalendarView(todosToRender) {
 
   const monthHeader = document.createElement('div');
   monthHeader.className = 'calendar-header';
-  monthHeader.textContent = now.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+  monthHeader.textContent = currentDate.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
   calendar.appendChild(monthHeader);
 
   const weekdays = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
@@ -582,29 +701,27 @@ document.addEventListener('click', () => {
   closeAllMenus();
 });
 
-// Menu Stato
-document.querySelectorAll('#status-menu .dropdown-item').forEach(item => {
-  item.addEventListener('click', () => {
-    currentFilter = item.dataset.value;
-    document.querySelectorAll('#status-menu .dropdown-item').forEach(i => i.classList.remove('active'));
-    item.classList.add('active');
-    closeAllMenus();
-    renderTodos();
-  });
+// Toggle Stato (Da fare / Completato)
+const statusToggle = document.getElementById('status-toggle');
+statusToggle.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const currentState = statusToggle.dataset.state;
+  const newState = currentState === 'active' ? 'completed' : 'active';
+  statusToggle.dataset.state = newState;
+  currentFilter = newState;
+  renderTodos();
 });
-document.querySelector('#status-menu .dropdown-item[data-value="all"]').classList.add('active');
 
-// Menu Vista
-document.querySelectorAll('#view-menu .dropdown-item').forEach(item => {
-  item.addEventListener('click', () => {
-    currentView = item.dataset.value;
-    document.querySelectorAll('#view-menu .dropdown-item').forEach(i => i.classList.remove('active'));
-    item.classList.add('active');
-    closeAllMenus();
-    renderTodos();
-  });
+// Toggle Vista (Lista / Calendario)
+const viewToggle = document.getElementById('view-toggle');
+viewToggle.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const currentViewState = viewToggle.dataset.view;
+  const newView = currentViewState === 'list' ? 'calendar' : 'list';
+  viewToggle.dataset.view = newView;
+  currentView = newView;
+  renderTodos();
 });
-document.querySelector('#view-menu .dropdown-item[data-value="list"]').classList.add('active');
 
 // Menu Categoria
 function updateCategoryMenu() {
@@ -680,21 +797,27 @@ function updateCalendarNavigation() {
 
 // ===== RESET FILTRI =====
 resetFiltersBtn.addEventListener('click', () => {
-  currentFilter = 'all';
+  currentFilter = 'active';
   currentCategoryFilter = 'all';
   currentDayFilter = 'all';
   currentView = 'list';
   
-  // Reset visual indicators
+  // Reset toggle buttons
+  const statusToggle = document.getElementById('status-toggle');
+  const viewToggle = document.getElementById('view-toggle');
+  if (statusToggle) statusToggle.dataset.state = 'active';
+  if (viewToggle) viewToggle.dataset.view = 'list';
+  
+  // Reset visual indicators per dropdown rimanenti
   document.querySelectorAll('.dropdown-item').forEach(item => {
     item.classList.remove('active');
   });
   
-  // Reset "all" items to active
-  document.querySelector('#status-menu [data-value="all"]').classList.add('active');
-  document.querySelector('#category-menu [data-value="all"]').classList.add('active');
-  document.querySelector('#day-menu [data-value="all"]').classList.add('active');
-  document.querySelector('#view-menu [data-value="list"]').classList.add('active');
+  // Reset "all" items to active per dropdown rimanenti
+  const categoryAll = document.querySelector('#category-menu [data-value="all"]');
+  const dayAll = document.querySelector('#day-menu [data-value="all"]');
+  if (categoryAll) categoryAll.classList.add('active');
+  if (dayAll) dayAll.classList.add('active');
   
   closeAllMenus();
   renderTodos();
@@ -1228,6 +1351,11 @@ function handleSectionDrop(e) {
 // ===== MOBILE TOUCH SUPPORT =====
 function handleTouchStart(e) {
   if (e.touches.length === 1) {
+    // Non attivare il drag se si sta cliccando sui bottoni delle azioni
+    if (e.target.closest('.todo-actions')) {
+      return;
+    }
+    
     const touch = e.touches[0];
     dragStartPos.x = touch.clientX;
     dragStartPos.y = touch.clientY;
@@ -1311,6 +1439,22 @@ window.removeChecklistItem = removeChecklistItem;
 window.toggleChecklistItem = toggleChecklistItem;
 window.showTodoDetail = showTodoDetail;
 
+// ===== GESTIONE CHIUSURA POPOVER =====
+document.addEventListener('click', (e) => {
+  // Chiudi tutti i popover se si clicca fuori
+  if (!e.target.closest('.todo-actions')) {
+    document.querySelectorAll('.action-popover').forEach(popover => {
+      popover.style.display = 'none';
+    });
+    // Rimuovi classe popover-open da tutti i todo-item e rimuovi focus dai menu button
+    document.querySelectorAll('.todo-item').forEach(item => {
+      item.classList.remove('popover-open');
+      const menuBtn = item.querySelector('.menu-btn');
+      if (menuBtn) menuBtn.blur();
+    });
+  }
+});
+
 // ===== EVENT LISTENERS NOTIFICHE =====
 notificationToggleBtn?.addEventListener('click', () => {
   notificationModal.style.display = 'flex';
@@ -1363,6 +1507,81 @@ if ('serviceWorker' in navigator) {
     }
   });
 }
+
+// ===== EVENT LISTENERS MODALE MODIFICA =====
+editHasChecklist.addEventListener('change', () => {
+  editChecklistContainer.style.display = editHasChecklist.checked ? 'block' : 'none';
+  if (!editHasChecklist.checked) {
+    editTempChecklistItems = [];
+    renderEditChecklistItems();
+  }
+});
+
+editAddChecklistBtn.addEventListener('click', () => {
+  const text = editChecklistInput.value.trim();
+  if (text) {
+    editTempChecklistItems.push({ text, completed: false });
+    editChecklistInput.value = '';
+    renderEditChecklistItems();
+  }
+});
+
+editChecklistInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    const text = editChecklistInput.value.trim();
+    if (text) {
+      editTempChecklistItems.push({ text, completed: false });
+      editChecklistInput.value = '';
+      renderEditChecklistItems();
+    }
+  }
+});
+
+closeEditBtn.addEventListener('click', () => {
+  editModal.style.display = 'none';
+  editingTodoIndex = null;
+  editTempChecklistItems = [];
+});
+
+cancelEditBtn.addEventListener('click', () => {
+  editModal.style.display = 'none';
+  editingTodoIndex = null;
+  editTempChecklistItems = [];
+});
+
+confirmEditBtn.addEventListener('click', () => {
+  if (editingTodoIndex === null) return;
+  
+  const text = editText.value.trim();
+  if (!text) return;
+  
+  // Aggiorna il todo
+  todos[editingTodoIndex].text = text;
+  todos[editingTodoIndex].date = editDate.value;
+  todos[editingTodoIndex].time = editTime.value;
+  todos[editingTodoIndex].category = editCategory.value;
+  todos[editingTodoIndex].checklist = editHasChecklist.checked ? [...editTempChecklistItems] : [];
+  
+  // Cancella vecchia notifica e crea nuova
+  cancelNotification(todos[editingTodoIndex].id);
+  scheduleNotification(todos[editingTodoIndex]);
+  
+  // Chiudi modale e salva
+  editModal.style.display = 'none';
+  editingTodoIndex = null;
+  editTempChecklistItems = [];
+  
+  saveAndRender();
+});
+
+// Chiudi modale modifica cliccando fuori
+editModal.addEventListener('click', (e) => {
+  if (e.target === editModal) {
+    editModal.style.display = 'none';
+    editingTodoIndex = null;
+    editTempChecklistItems = [];
+  }
+});
 
 // Avvio
 updateCalendarNavigation();
