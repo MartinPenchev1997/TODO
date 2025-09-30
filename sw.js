@@ -1,6 +1,6 @@
 // sw.js v.3 - Aggiunto supporto notifiche
 // const CACHE_NAME = 'todo-app-v3';
-
+// diomerda
 self.addEventListener('fetch', () => {});
 
 // // Gestione messaggi per notifiche
