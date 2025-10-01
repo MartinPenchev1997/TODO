@@ -31,7 +31,7 @@
             </svg>
           </button>
           <!-- Bottone Shortcuts Help -->
-          <button id="shortcuts-help-toggle" class="theme-toggle" aria-label="Scorciatoie tastiera"
+          <!-- <button id="shortcuts-help-toggle" class="theme-toggle" aria-label="Scorciatoie tastiera"
             title="Scorciatoie (?)">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2">
@@ -39,7 +39,17 @@
               <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
               <line x1="12" y1="17" x2="12.01" y2="17" />
             </svg>
+          </button> -->
+          
+          <!-- Bottone Mostra/Nascondi filtri -->
+          <button id="filter-toggle" class="theme-toggle" aria-label="Toggle filtri"
+            title="Mostra/Nascondi filtri">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+            </svg>
           </button>
+
           <button id="notification-toggle" class="theme-toggle" aria-label="Impostazioni notifiche" title="Notifiche"
             style="display: none;">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -221,6 +231,18 @@
       </div>
     </div>
   </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Task List. Creato da <b>Martin Penchev</b> per un utilizzo quotidiano.</p>
+      <div class="footer-meta">
+        <span>v1.0</span>
+        <span>•</span>
+        <span>Made in Italy</span>
+      </div>
+    </div>
+  </footer>
 
   <!-- Modale Crea Task -->
   <div id="category-modal" class="modal" style="display: none;">

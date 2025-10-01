@@ -99,3 +99,17 @@ function resetEditForm() {
   if (typeof editTempChecklistItems !== 'undefined') editTempChecklistItems = [];
   if (typeof renderEditChecklistItems === 'function') renderEditChecklistItems();
 }
+
+// Inizializza lo stato del form al caricamento della pagina
+function initializeFormState() {
+  const savedState = localStorage.getItem('formVisible');
+  
+  if (savedState === 'false') {
+    form.classList.add('form-hidden');
+    form.classList.remove('form-visible');
+  } else {
+    // Default: form visibile
+    form.classList.add('form-visible');
+    form.classList.remove('form-hidden');
+  }
+}

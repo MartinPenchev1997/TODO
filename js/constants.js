@@ -1,6 +1,7 @@
 // ===== ELEMENTI DOM =====
 const htmlRoot = document.getElementById('html-root');
 const themeToggle = document.getElementById('theme-toggle');
+const filterToggle = document.getElementById('filter-toggle');
 const form = document.getElementById('todo-form');
 const input = document.getElementById('todo-input');
 const dateInput = document.getElementById('todo-date');

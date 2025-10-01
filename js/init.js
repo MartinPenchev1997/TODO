@@ -25,3 +25,6 @@ updateSortUI();
 
 // Inizializza controllo ricorrenze
 initializeRecurrenceCheck();
+
+// Inizializza stato form
+initializeFormState();

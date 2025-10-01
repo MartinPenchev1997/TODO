@@ -6,6 +6,21 @@ themeToggle.addEventListener("click", () => {
   localStorage.setItem("theme", newTheme);
 });
 
+// ===== TOGGLE FILTRI =====
+filterToggle.addEventListener("click", () => {
+  const isHidden = form.classList.contains('form-hidden');
+  
+  if (isHidden) {
+    form.classList.remove('form-hidden');
+    form.classList.add('form-visible');
+    localStorage.setItem('formVisible', 'true');
+  } else {
+    form.classList.remove('form-visible');
+    form.classList.add('form-hidden');
+    localStorage.setItem('formVisible', 'false');
+  }
+});
+
 // ===== BOTTONE NUOVO TASK =====
 form.addEventListener("submit", (e) => {
   e.preventDefault();
