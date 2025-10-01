@@ -40,6 +40,13 @@ function editTodo(index) {
   editTime.value = todo.time;
   editCategory.value = todo.category;
   
+  // Imposta priorità corrente
+  const currentPriority = todo.priority || 'none';
+  const priorityRadio = document.querySelector(`input[name="edit-priority"][value="${currentPriority}"]`);
+  if (priorityRadio) {
+    priorityRadio.checked = true;
+  }
+  
   // Gestione checklist
   editTempChecklistItems = todo.checklist ? [...todo.checklist] : [];
   editHasChecklist.checked = editTempChecklistItems.length > 0;

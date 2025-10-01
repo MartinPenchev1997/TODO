@@ -6,47 +6,29 @@ themeToggle.addEventListener('click', () => {
   localStorage.setItem('theme', newTheme);
 });
 
-// ===== FORM SUBMIT =====
+// ===== BOTTONE NUOVO TASK =====
 form.addEventListener('submit', (e) => {
   e.preventDefault();
-  const text = input.value.trim();
-  const date = dateInput.value;
-  const time = timeInput.value;
-  
-  if (!text) return;
-  
-  // Se non è impostata una categoria, mostra la modale
-  if (!tempTodo || !tempTodo.category) {
-    tempTodo = { text, date, time };
-    openCategoryModal();
-    return;
-  }
-  
-  // Aggiungi il todo con categoria, ora e checklist
-  const newTodo = {
-    id: Date.now(),
-    text,
-    completed: false,
-    date,
-    time,
-    category: tempTodo.category,
-    checklist: tempTodo.checklist || []
-  };
-  
-  todos.push(newTodo);
-  
-  // Schedula notifica per il nuovo task
-  scheduleNotification(newTodo);
-  
-  input.value = '';
-  tempTodo = null;
-  tempChecklistItems = [];
-  
-  saveAndRender();
+  // Apri direttamente la modale per creare nuovo task
+  openCategoryModal();
 });
 
 // ===== MODALE CATEGORIA - CONFERMA =====
 document.getElementById('confirm-category').addEventListener('click', () => {
+  // Leggi tutti i dati dalla modale
+  const text = input.value.trim();
+  const date = dateInput.value;
+  const time = timeInput.value;
+  
+  if (!text) {
+    input.classList.add('input-error');
+
+    setTimeout(() => {
+      input.classList.remove('input-error');
+    },100);
+    return;
+  }
+  
   let selectedCategory = '';
   
   // Check radio buttons
@@ -61,15 +43,35 @@ document.getElementById('confirm-category').addEventListener('click', () => {
     selectedCategory = 'Senza categoria';
   }
   
-  // Add category and checklist to tempTodo
-  if (tempTodo) {
-    tempTodo.category = selectedCategory;
-    if (enableChecklistCheckbox.checked) {
-      tempTodo.checklist = [...tempChecklistItems];
-    }
-  }
+  // Get priority
+  const selectedPriority = document.querySelector('input[name="priority"]:checked');
+  const priority = selectedPriority ? selectedPriority.value : 'none';
   
+  // Get checklist
+  const checklist = enableChecklistCheckbox.checked ? [...tempChecklistItems] : [];
+  
+  // Crea il nuovo todo
+  const newTodo = {
+    id: Date.now(),
+    text,
+    completed: false,
+    date,
+    time,
+    category: selectedCategory,
+    checklist,
+    priority
+  };
+  
+  todos.push(newTodo);
+  
+  // Schedula notifica per il nuovo task
+  scheduleNotification(newTodo);
+  
+  // Reset tutto
+  input.value = '';
   categoryModal.style.display = 'none';
+  tempTodo = null;
+  tempChecklistItems = [];
   
   // Reset form
   categoryRadios.forEach(radio => radio.checked = false);
@@ -77,13 +79,9 @@ document.getElementById('confirm-category').addEventListener('click', () => {
   categoryInput.disabled = true;
   enableChecklistCheckbox.checked = false;
   checklistItems.style.display = 'none';
-  tempChecklistItems = [];
   renderChecklistItems();
   
-  // Submit the form
-  if (tempTodo) {
-    form.dispatchEvent(new Event('submit'));
-  }
+  saveAndRender();
 });
 
 // ===== CANCEL CATEGORY HANDLER =====
@@ -91,7 +89,8 @@ document.getElementById('cancel-category').addEventListener('click', () => {
   categoryModal.style.display = 'none';
   tempTodo = null;
   
-  // Reset form
+  // Reset tutto incluso input principale
+  input.value = '';
   categoryRadios.forEach(radio => radio.checked = false);
   categoryInput.value = '';
   categoryInput.disabled = true;
@@ -212,6 +211,12 @@ resetFiltersBtn.addEventListener('click', () => {
   currentCategoryFilter = 'all';
   currentDayFilter = 'all';
   currentView = 'list';
+  
+  // Reset ricerca e sorting
+  if (typeof clearSearch === 'function') clearSearch();
+  currentSortBy = 'date';
+  sortDirection = 'desc';
+  if (typeof updateSortUI === 'function') updateSortUI();
   
   // Reset toggle buttons
   const statusToggle = document.getElementById('status-toggle');
@@ -346,11 +351,16 @@ confirmEditBtn.addEventListener('click', () => {
   const text = editText.value.trim();
   if (!text) return;
   
+  // Get priority
+  const selectedPriority = document.querySelector('input[name="edit-priority"]:checked');
+  const priority = selectedPriority ? selectedPriority.value : 'none';
+  
   // Aggiorna il todo
   todos[editingTodoIndex].text = text;
   todos[editingTodoIndex].date = editDate.value;
   todos[editingTodoIndex].time = editTime.value;
   todos[editingTodoIndex].category = editCategory.value;
+  todos[editingTodoIndex].priority = priority;
   todos[editingTodoIndex].checklist = editHasChecklist.checked ? [...editTempChecklistItems] : [];
   
   // Cancella vecchia notifica e crea nuova
@@ -371,6 +381,65 @@ editModal.addEventListener('click', (e) => {
     editModal.style.display = 'none';
     editingTodoIndex = null;
     editTempChecklistItems = [];
+  }
+});
+
+// ===== EVENT LISTENERS RICERCA =====
+const searchInput = document.getElementById('search-input');
+const clearSearchBtn = document.getElementById('clear-search');
+
+searchInput?.addEventListener('input', (e) => {
+  const query = e.target.value;
+  updateSearchQuery(query);
+  
+  // Mostra/nascondi bottone clear
+  if (clearSearchBtn) {
+    clearSearchBtn.style.display = query ? 'flex' : 'none';
+  }
+});
+
+clearSearchBtn?.addEventListener('click', () => {
+  clearSearch();
+  clearSearchBtn.style.display = 'none';
+});
+
+// ===== EVENT LISTENERS SORTING =====
+document.querySelectorAll('.sort-option').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const sortBy = btn.dataset.sort;
+    setSortBy(sortBy);
+  });
+});
+
+// ===== EVENT LISTENERS STATISTICHE =====
+const statisticsToggle = document.getElementById('statistics-toggle');
+const statisticsModal = document.getElementById('statistics-modal');
+const closeStatistics = document.getElementById('close-statistics');
+
+statisticsToggle?.addEventListener('click', toggleStatistics);
+closeStatistics?.addEventListener('click', () => {
+  statisticsModal.style.display = 'none';
+});
+
+statisticsModal?.addEventListener('click', (e) => {
+  if (e.target === statisticsModal) {
+    statisticsModal.style.display = 'none';
+  }
+});
+
+// ===== EVENT LISTENERS SHORTCUTS HELP =====
+const shortcutsHelpToggle = document.getElementById('shortcuts-help-toggle');
+const shortcutsHelpModal = document.getElementById('shortcuts-help-modal');
+const closeShortcutsHelp = document.getElementById('close-shortcuts-help');
+
+shortcutsHelpToggle?.addEventListener('click', showShortcutsHelp);
+closeShortcutsHelp?.addEventListener('click', () => {
+  shortcutsHelpModal.style.display = 'none';
+});
+
+shortcutsHelpModal?.addEventListener('click', (e) => {
+  if (e.target === shortcutsHelpModal) {
+    shortcutsHelpModal.style.display = 'none';
   }
 });
 

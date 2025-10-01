@@ -17,14 +17,19 @@ let notificationSettings = {
   minutesBefore: 30
 };
 
+// ===== NUOVE VARIABILI (Features v2) =====
+let searchQuery = '';               // Query ricerca testuale
+let currentSortBy = 'date';         // 'date', 'priority', 'category', 'alphabetical'
+let sortDirection = 'desc';          // 'asc', 'desc'
+
 // ===== INIZIALIZZAZIONE VALORI DEFAULT =====
 const today = new Date().toISOString().split('T')[0];
 dateInput.value = today;
 dateInput.min = today;
 
-// Imposta ora attuale come default
+// Imposta ora attuale + 30min. come default
 const now = new Date();
-const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+const currentTime = now.getHours().toString().padStart(2, '0') + ':' + (now.getMinutes()+30).toString().padStart(2, '0');
 timeInput.value = currentTime;
 
 // Carica tema

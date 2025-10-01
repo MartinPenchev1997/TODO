@@ -16,3 +16,9 @@ setTimeout(() => {
 }, 1000);
 
 updateCategoryMenu();
+
+// Inizializza keyboard shortcuts
+initializeKeyboardShortcuts();
+
+// Inizializza UI sorting
+updateSortUI();

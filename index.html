@@ -7,6 +7,7 @@
   <meta name="theme-color" content="#6366f1">
   <title>Task List</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style-features.css" />
   <link rel="icon" href="images.jpeg">
   <link rel="manifest" href="manifest.json">
 </head>
@@ -19,6 +20,26 @@
       <header>
         <h1>🗓️ Task List</h1>
         <div class="header-controls">
+          <!-- Bottone Statistiche -->
+          <button id="statistics-toggle" class="theme-toggle" aria-label="Statistiche" title="Statistiche">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <path d="M3 3v18h18" />
+              <path d="M18 17V9" />
+              <path d="M13 17V5" />
+              <path d="M8 17v-3" />
+            </svg>
+          </button>
+          <!-- Bottone Shortcuts Help -->
+          <button id="shortcuts-help-toggle" class="theme-toggle" aria-label="Scorciatoie tastiera"
+            title="Scorciatoie (?)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </button>
           <button id="notification-toggle" class="theme-toggle" aria-label="Impostazioni notifiche" title="Notifiche"
             style="display: none;">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -38,28 +59,8 @@
         </div>
       </header>
 
-      <!-- Form con input testo + date picker -->
+      <!-- Form -->
       <form id="todo-form" class="input-section">
-        <input type="text" id="todo-input" placeholder="Cosa devi fare?" autocomplete="off" required />
-        <div class="datetime-compact">
-          <div class="datetime-input-wrapper">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-            <input type="date" id="todo-date" />
-          </div>
-          <div class="datetime-input-wrapper">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12 6 12 12 16 14"/>
-            </svg>
-            <input type="time" id="todo-time" />
-          </div>
-        </div>
-
         <!-- Controls Row: Submit + Filtri + Reset (DENTRO il form ma con type="button") -->
         <div class="controls-row">
           <button type="submit" aria-label="Aggiungi compito">
@@ -73,15 +74,16 @@
           <!-- Dropdown Filtri Compatti -->
           <div class="compact-filters">
             <!-- Toggle Stato -->
-            <button type="button" class="toggle-btn" id="status-toggle" data-state="active" aria-label="Toggle stato task">
+            <button type="button" class="toggle-btn" id="status-toggle" data-state="active"
+              aria-label="Toggle stato task">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" class="icon-active">
                 <circle cx="12" cy="12" r="10" />
               </svg>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" class="icon-completed">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
               </svg>
             </button>
 
@@ -123,19 +125,19 @@
             <button type="button" class="toggle-btn" id="view-toggle" data-view="list" aria-label="Toggle vista">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" class="icon-list">
-                <line x1="8" y1="6" x2="21" y2="6"/>
-                <line x1="8" y1="12" x2="21" y2="12"/>
-                <line x1="8" y1="18" x2="21" y2="18"/>
-                <line x1="3" y1="6" x2="3.01" y2="6"/>
-                <line x1="3" y1="12" x2="3.01" y2="12"/>
-                <line x1="3" y1="18" x2="3.01" y2="18"/>
+                <line x1="8" y1="6" x2="21" y2="6" />
+                <line x1="8" y1="12" x2="21" y2="12" />
+                <line x1="8" y1="18" x2="21" y2="18" />
+                <line x1="3" y1="6" x2="3.01" y2="6" />
+                <line x1="3" y1="12" x2="3.01" y2="12" />
+                <line x1="3" y1="18" x2="3.01" y2="18" />
               </svg>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" class="icon-calendar">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8" y1="2" x2="8" y2="6"/>
-                <line x1="3" y1="10" x2="21" y2="10"/>
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
               </svg>
             </button>
           </div>
@@ -153,6 +155,40 @@
           </button>
         </div>
       </form>
+
+      <!-- Barra Ricerca e Sorting -->
+      <div class="search-sort-bar">
+        <div class="search-container">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" class="search-icon">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+          <input type="text" id="search-input" placeholder="Cerca task... (Premi / per focus)" autocomplete="off" />
+          <button id="clear-search" class="clear-search-btn" style="display: none;" aria-label="Pulisci ricerca">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="sort-container">
+          <button class="sort-option active" data-sort="date" title="Ordina per data">
+            📅
+          </button>
+          <button class="sort-option" data-sort="priority" title="Ordina per priorità">
+            🎯
+          </button>
+          <button class="sort-option" data-sort="category" title="Ordina per categoria">
+            🏷️
+          </button>
+          <button class="sort-option" data-sort="alphabetical" title="Ordina alfabeticamente">
+            🔤
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Lista compiti scrollabile -->
@@ -186,10 +222,31 @@
     </div>
   </div>
 
-  <!-- Modale Categoria -->
+  <!-- Modale Crea Task -->
   <div id="category-modal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <h3>Seleziona o crea una categoria</h3>
+    <div class="modal-content create-modal">
+      <h3>➕ Nuovo task</h3>
+      <div class="datetime-compact">
+        <input type="text" id="todo-input" placeholder="Nome task" autocomplete="off" required />
+        <div class="datetime-input-wrapper">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          <input type="date" id="todo-date" />
+        </div>
+        <div class="datetime-input-wrapper">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          <input type="time" id="todo-time" />
+        </div>
+      </div>
 
       <!-- Categorie predefinite -->
       <div class="category-options">
@@ -221,6 +278,29 @@
 
       <input type="text" id="category-input" placeholder="Nome categoria personalizzata..." disabled />
 
+      <!-- Priorità -->
+      <div class="priority-selector">
+        <label>Priorità:</label>
+        <div class="priority-options">
+          <div class="radio-group-p">
+            <input type="radio" id="priority-none" name="priority" value="none" checked>
+            <label for="priority-none">⚪ Nessuna</label>
+          </div>
+          <div class="radio-group-p">
+            <input type="radio" id="priority-low" name="priority" value="low">
+            <label for="priority-low">🟢 Bassa</label>
+          </div>
+          <div class="radio-group-p">
+            <input type="radio" id="priority-medium" name="priority" value="medium">
+            <label for="priority-medium">🟡 Media</label>
+          </div>
+          <div class="radio-group-p">
+            <input type="radio" id="priority-high" name="priority" value="high">
+            <label for="priority-high">🔴 Alta</label>
+          </div>
+        </div>
+      </div>
+
       <!-- Opzione Checklist -->
       <div class="checklist-option">
         <input type="checkbox" id="enable-checklist">
@@ -245,10 +325,10 @@
 
   <!-- Modale Dettaglio Task -->
   <div id="detail-modal" class="modal" style="display: none;">
-    <div class="modal-content">
+    <div class="modal-content detail-modal">
       <div class="modal-header">
         <h3 id="detail-title"></h3>
-        <button id="close-detail" class="close-btn">&times;</button>
+        <button id="close-detail" class="close-btn">❌</button>
       </div>
       <div class="detail-content">
         <div class="detail-info">
@@ -302,28 +382,22 @@
 
   <!-- Modale Modifica Task -->
   <div id="edit-modal" class="modal" style="display: none;">
-    <div class="modal-content">
+    <div class="modal-content edit-modal">
       <div class="modal-header">
         <h3>✏️ Modifica Task</h3>
-        <button id="close-edit" class="close-btn">&times;</button>
+        <button id="close-edit" class="close-btn">❌</button>
       </div>
       <div class="edit-form">
         <div class="form-group">
-          <label for="edit-text">Cosa devi fare?</label>
           <input type="text" id="edit-text" placeholder="Descrizione task..." required>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="edit-date">Data</label>
-            <input type="date" id="edit-date" required>
-          </div>
-          <div class="form-group">
-            <label for="edit-time">Ora</label>
-            <input type="time" id="edit-time" required>
-          </div>
+        <div class="form-group">
+          <input type="date" id="edit-date" required>
         </div>
         <div class="form-group">
-          <label for="edit-category">Categoria</label>
+          <input type="time" id="edit-time" required>
+        </div>
+        <div class="form-group">
           <select id="edit-category">
             <option value="Lavoro">Lavoro</option>
             <option value="Studio">Studio</option>
@@ -332,6 +406,30 @@
             <option value="Altro">Altro</option>
           </select>
         </div>
+
+        <!-- Priorità -->
+        <div class="priority-selector">
+          <label>Priorità:</label>
+          <div class="priority-options">
+            <div class="radio-group-p">
+              <input type="radio" id="edit-priority-none" name="edit-priority" value="none">
+              <label for="edit-priority-none">⚪ Nessuna</label>
+            </div>
+            <div class="radio-group-p">
+              <input type="radio" id="edit-priority-low" name="edit-priority" value="low">
+              <label for="edit-priority-low">🟢 Bassa</label>
+            </div>
+            <div class="radio-group-p">
+              <input type="radio" id="edit-priority-medium" name="edit-priority" value="medium">
+              <label for="edit-priority-medium">🟡 Media</label>
+            </div>
+            <div class="radio-group-p">
+              <input type="radio" id="edit-priority-high" name="edit-priority" value="high">
+              <label for="edit-priority-high">🔴 Alta</label>
+            </div>
+          </div>
+        </div>
+
         <div class="checklist-option">
           <input type="checkbox" id="edit-has-checklist">
           <label for="edit-has-checklist">Questo task ha una checklist</label>
@@ -351,6 +449,65 @@
     </div>
   </div>
 
+  <!-- Modale Statistiche -->
+  <div id="statistics-modal" class="modal" style="display: none;">
+    <div class="modal-content stats-modal">
+      <div class="modal-header">
+        <h2>📊 Statistiche</h2>
+        <button id="close-statistics" class="close-btn">❌</button>
+      </div>
+      <div id="statistics-container"></div>
+    </div>
+  </div>
+
+  <!-- Modale Shortcuts Help -->
+  <div id="shortcuts-help-modal" class="modal" style="display: none;">
+    <div class="modal-content shortcuts-modal">
+      <div class="modal-header">
+        <h4>⌨️ Scorciatoie Tastiera</h4>
+        <button id="close-shortcuts-help" class="close-btn">❌</button>
+      </div>
+      <div class="shortcuts-list">
+        <div class="shortcut-item">
+          <kbd>/</kbd>
+          <span>Focus su ricerca</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>N</kbd>
+          <span>Nuovo task (focus su input)</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>S</kbd>
+          <span>Mostra/nascondi statistiche</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Ctrl+S</kbd>
+          <span>Mostra statistiche (alternativa)</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>R</kbd>
+          <span>Reset tutti i filtri</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>C</kbd>
+          <span>Toggle vista calendario/lista</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>V</kbd>
+          <span>Toggle attivi/completati</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Esc</kbd>
+          <span>Chiudi modali / Pulisci ricerca</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>?</kbd>
+          <span>Mostra questo aiuto</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Template per Todo Item -->
   <template id="todo-item-template">
     <li class="todo-item" draggable="true">
@@ -363,37 +520,42 @@
       </div>
       <div class="todo-actions">
         <button class="action-btn menu-btn" data-action="menu">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="1"/>
-            <circle cx="19" cy="12" r="1"/>
-            <circle cx="5" cy="12" r="1"/>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="1" />
+            <circle cx="19" cy="12" r="1" />
+            <circle cx="5" cy="12" r="1" />
           </svg>
         </button>
         <div class="action-popover" style="display: none;">
           <button class="popover-item complete-action" data-action="complete">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="20 6 9 17 4 12"/>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12" />
             </svg>
             <span class="action-label">Completa</span>
           </button>
           <button class="popover-item edit-action" data-action="edit">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
             </svg>
             <span class="action-label">Modifica</span>
           </button>
           <button class="popover-item delete-action" data-action="delete">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
             </svg>
             <span class="action-label">Elimina</span>
           </button>
           <button class="popover-item detail-action" data-action="detail">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="16" x2="12" y2="12"/>
-              <line x1="12" y1="8" x2="12.01" y2="8"/>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
             </svg>
             <span class="action-label">Dettagli</span>
           </button>
@@ -407,11 +569,15 @@
   <script src="js/state.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/notifications.js"></script>
+  <script src="js/search.js"></script>
+  <script src="js/priority.js"></script>
+  <script src="js/statistics.js"></script>
   <script src="js/drag-drop.js"></script>
   <script src="js/rendering.js"></script>
   <script src="js/modals.js"></script>
   <script src="js/filters.js"></script>
   <script src="js/todo-actions.js"></script>
+  <script src="js/shortcuts.js"></script>
   <script src="js/event-listeners.js"></script>
   <script src="js/init.js"></script>
 

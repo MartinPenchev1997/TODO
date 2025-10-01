@@ -135,8 +135,9 @@ header h1 {
 
 .datetime-compact {
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  align-items: center;
+  /* align-items: center; */
 }
 
 .datetime-input-wrapper {
@@ -226,9 +227,10 @@ header h1 {
 
 /* ===== CONTAINER LISTA ===== */
 .todo-container {
-  padding: 0 20px 20px;
+  padding: 10px 20px 20px;
   min-height: 100px;
-  overflow: visible;
+  /* overflow: visible; */
+  overflow: auto;
   flex: 1;
 }
 
@@ -493,6 +495,8 @@ header h1 {
   width: 90%;
   max-width: 400px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  height: 100%;
+  overflow-y: scroll;
 }
 
 .modal-content h3 {
@@ -537,34 +541,47 @@ header h1 {
 
 /* ===== RADIO BUTTONS PER CATEGORIE ===== */
 .category-options {
-  margin-bottom: 16px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(25%, 1fr));
   gap: 8px;
+  margin-top: 12px;
 }
 
 .radio-group {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px;
-  border-radius: 8px;
-  transition: var(--transition);
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  background: var(--bg-light);
+  border: 1px solid var(--border);
+  margin-bottom: 5px;
 }
 
 .radio-group:hover {
-  background: var(--bg);
+  background: var(--bg-hover);
+  border-color: var(--primary);
+}
+
+.radio-group:has(input:checked) {
+  background: var(--primary-light);
+  border-color: var(--primary);
 }
 
 .radio-group input[type="radio"] {
   margin: 0;
   cursor: pointer;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
 }
 
 .radio-group label {
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text);
+  flex-grow: 1;
 }
 
 #category-input:disabled {
@@ -1090,7 +1107,7 @@ header h1 {
 .edit-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 6px;
 }
 
 .form-group {
@@ -1294,9 +1311,9 @@ header h1 {
     order: 3;
   }
   
-  .category-options {
+  /* .category-options {
     grid-template-columns: 1fr;
-  }
+  } */
   
   .nav-btn {
     width: 36px;
