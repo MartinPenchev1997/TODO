@@ -84,6 +84,5 @@ function isOverdue(todo) {
   
   const now = new Date();
   const todoDateTime = new Date(todo.date + 'T' + (todo.time || '23:59'));
-  
   return todoDateTime < now;
 }

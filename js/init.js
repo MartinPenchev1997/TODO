@@ -22,3 +22,6 @@ initializeKeyboardShortcuts();
 
 // Inizializza UI sorting
 updateSortUI();
+
+// Inizializza controllo ricorrenze
+initializeRecurrenceCheck();

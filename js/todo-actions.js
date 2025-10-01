@@ -6,6 +6,11 @@ function toggleComplete(index) {
   if (todo.completed) {
     // Se completato, cancella la notifica
     cancelNotification(todo.id);
+    
+    // Dispatch evento per ricorrenze
+    document.dispatchEvent(new CustomEvent('taskCompleted', { 
+      detail: { todo: todo, index: index }
+    }));
   } else {
     // Se riattivato, ri-schedula la notifica
     scheduleNotification(todo);
@@ -45,6 +50,11 @@ function editTodo(index) {
   const priorityRadio = document.querySelector(`input[name="edit-priority"][value="${currentPriority}"]`);
   if (priorityRadio) {
     priorityRadio.checked = true;
+  }
+  
+  // Imposta ricorrenza corrente
+  if (editRecurrence) {
+    editRecurrence.value = todo.recurrence || 'none';
   }
   
   // Gestione checklist

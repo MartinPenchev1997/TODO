@@ -169,6 +169,14 @@ function createTodoElement(todo) {
     priorityBadge.innerHTML = getPriorityBadge(todo.priority);
     priorityContainer.insertBefore(priorityBadge, priorityContainer.firstChild);
   }
+  
+  // Aggiungi badge ricorrenza
+  if (todo.recurrence && todo.recurrence !== "none") {
+    const recurrenceBadge = document.createElement("span");
+    recurrenceBadge.className = "recurrence-indicator";
+    recurrenceBadge.innerHTML = getRecurrenceBadge(todo);
+    priorityContainer.appendChild(recurrenceBadge);
+  }
 
   const todoTime = li.querySelector(".todo-time");
   todoTime.textContent = todo.time || "00:00";

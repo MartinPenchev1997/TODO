@@ -20,7 +20,7 @@ let notificationSettings = {
 // ===== NUOVE VARIABILI (Features v2) =====
 let searchQuery = '';               // Query ricerca testuale
 let currentSortBy = 'date';         // 'date', 'priority', 'category', 'alphabetical'
-let sortDirection = 'desc';          // 'asc', 'desc'
+let sortDirection = 'asc';          // 'asc', 'desc'
 
 // ===== INIZIALIZZAZIONE VALORI DEFAULT =====
 const today = new Date().toISOString().split('T')[0];

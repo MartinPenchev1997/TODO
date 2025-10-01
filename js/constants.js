@@ -51,6 +51,7 @@ const editText = document.getElementById('edit-text');
 const editDate = document.getElementById('edit-date');
 const editTime = document.getElementById('edit-time');
 const editCategory = document.getElementById('edit-category');
+const editRecurrence = document.getElementById('edit-recurrence');
 const editHasChecklist = document.getElementById('edit-has-checklist');
 const editChecklistContainer = document.getElementById('edit-checklist-container');
 const editChecklistInput = document.getElementById('edit-checklist-input');
@@ -59,3 +60,6 @@ const editChecklistList = document.getElementById('edit-checklist-list');
 const closeEditBtn = document.getElementById('close-edit');
 const cancelEditBtn = document.getElementById('cancel-edit');
 const confirmEditBtn = document.getElementById('confirm-edit');
+
+// ===== RICORRENZA =====
+const recurrenceSelect = document.getElementById('recurrence-select');

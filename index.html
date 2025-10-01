@@ -307,6 +307,20 @@
         <label for="enable-checklist">Crea come checklist di attività</label>
       </div>
 
+      <!-- Ricorrenza -->
+      <div class="recurrence-selector">
+        <label>Ricorrenza:</label>
+        <select id="recurrence-select">
+          <option value="none">Nessuna</option>
+          <option value="daily">Giornaliera</option>
+          <option value="weekly">Settimanale</option>
+          <option value="biweekly">Ogni 2 settimane</option>
+          <option value="monthly">Mensile</option>
+          <option value="yearly">Annuale</option>
+        </select>
+        <small class="recurrence-info">💡 I task ricorrenti si ripetono automaticamente quando completati</small>
+      </div>
+
       <!-- Checklist Items -->
       <div id="checklist-items" class="checklist-items" style="display: none;">
         <div class="checklist-input-group">
@@ -428,6 +442,20 @@
               <label for="edit-priority-high">🔴 Alta</label>
             </div>
           </div>
+        </div>
+
+        <!-- Ricorrenza -->
+        <div class="recurrence-selector">
+          <label for="edit-recurrence">Ricorrenza:</label>
+          <select id="edit-recurrence">
+            <option value="none">Nessuna</option>
+            <option value="daily">Giornaliera</option>
+            <option value="weekly">Settimanale</option>
+            <option value="biweekly">Ogni 2 settimane</option>
+            <option value="monthly">Mensile</option>
+            <option value="yearly">Annuale</option>
+          </select>
+          <small class="recurrence-info">💡 I task ricorrenti si ripetono automaticamente quando completati</small>
         </div>
 
         <div class="checklist-option">
@@ -572,6 +600,7 @@
   <script src="js/search.js"></script>
   <script src="js/priority.js"></script>
   <script src="js/statistics.js"></script>
+  <script src="js/recurring.js"></script>
   <script src="js/drag-drop.js"></script>
   <script src="js/rendering.js"></script>
   <script src="js/modals.js"></script>
