@@ -29,7 +29,8 @@ dateInput.min = today;
 
 // Imposta ora attuale + 30min. come default
 const now = new Date();
-const currentTime = now.getHours().toString().padStart(2, '0') + ':' + (now.getMinutes()+30).toString().padStart(2, '0');
+now.setMinutes(now.getMinutes() + 30);
+const currentTime = now.getHours().toString().padStart(2, '0') + ':' + (now.getMinutes()).toString().padStart(2, '0');
 timeInput.value = currentTime;
 
 // Carica tema
