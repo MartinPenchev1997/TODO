@@ -170,14 +170,23 @@ document.addEventListener("keydown", (e) => {
 
 // ===== DROPDOWN FILTRI =====
 document.querySelectorAll(".dropdown-toggle").forEach((btn) => {
+  // Salva il riferimento al menu associato al bottone
+  const menu = btn.nextElementSibling;  
+  btn._associatedMenu = menu;
+  
   btn.addEventListener("click", (e) => {
     e.stopPropagation();
-    const menu = btn.nextElementSibling;
-    if (menu.classList.contains("active")) {
-      menu.classList.remove("active");
+    const associatedMenu = btn._associatedMenu;
+
+    if (associatedMenu.classList.contains("active")) {
+      associatedMenu.classList.remove("active");
+      // Ripristina il menu nella sua posizione originale
+      restoreMenuToOriginalPosition(associatedMenu);
     } else {
       closeAllMenus();
-      menu.classList.add("active");
+      associatedMenu.classList.add("active");
+      // Stacca il menu e riattaccalo al body con posizionamento assoluto
+      attachMenuToBody(btn, associatedMenu);
     }
   });
 });
