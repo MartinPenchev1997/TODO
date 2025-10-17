@@ -74,7 +74,7 @@ function showNotification(message, duration = 3000) {
 function resetEditForm() {
   if (typeof input !== 'undefined' && input) input.value = '';
   const now = new Date();
-  now.setMinutes(now.getMinutes+30);
+  now.setMinutes(now.getMinutes()+30);
   if (typeof dateInput !== 'undefined' && dateInput) dateInput.value = now.toISOString().split('T')[0];
   if (typeof timeInput !== 'undefined' && timeInput) timeInput.value = now.toTimeString().split(' ')[0].substring(0, 5);
   if (typeof categoryInput !== 'undefined' && categoryInput) categoryInput.value = '';  
