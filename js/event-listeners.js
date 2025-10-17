@@ -85,6 +85,7 @@ document.getElementById("confirm-category").addEventListener("click", () => {
     checklist,
     priority,
     recurrence,
+    attachments: [...tempAttachments], // Aggiungi attachments
   };
 
   todos.push(newTodo);
@@ -97,6 +98,7 @@ document.getElementById("confirm-category").addEventListener("click", () => {
   categoryModal.style.display = "none";
   tempTodo = null;
   tempChecklistItems = [];
+  resetTempAttachments(); // Reset attachments
 
   // Reset form
   categoryRadios.forEach((radio) => (radio.checked = false));
@@ -123,6 +125,7 @@ document.getElementById("cancel-category").addEventListener("click", () => {
   checklistItems.style.display = "none";
   if (recurrenceSelect) recurrenceSelect.value = "none";
   tempChecklistItems = [];
+  resetTempAttachments(); // Reset attachments
   renderChecklistItems();
   resetEditForm();
 });
@@ -313,7 +316,7 @@ saveNotificationBtn?.addEventListener("click", async () => {
     notificationPermission = permission === "granted";
 
     if (!notificationPermission) {
-      alert("Permessi notifiche negati. Le notifiche non funzioneranno.");
+      await showAlert("Permessi notifiche negati. Le notifiche non funzioneranno.");
       notificationEnabledCheckbox.checked = false;
       return;
     }
@@ -379,6 +382,7 @@ closeEditBtn.addEventListener("click", () => {
   editModal.style.display = "none";
   editingTodoIndex = null;
   editTempChecklistItems = [];
+  resetEditTempAttachments(); // Reset attachments
   resetEditForm();
 });
 
@@ -386,6 +390,7 @@ cancelEditBtn.addEventListener("click", () => {
   editModal.style.display = "none";
   editingTodoIndex = null;
   editTempChecklistItems = [];
+  resetEditTempAttachments(); // Reset attachments
   resetEditForm();
 });
 
@@ -414,6 +419,15 @@ confirmEditBtn.addEventListener("click", () => {
   todos[editingTodoIndex].checklist = editHasChecklist.checked
     ? [...editTempChecklistItems]
     : [];
+  
+  // Aggiorna attachments: mantieni quelli esistenti e aggiungi i nuovi
+  if (!todos[editingTodoIndex].attachments) {
+    todos[editingTodoIndex].attachments = [];
+  }
+  todos[editingTodoIndex].attachments = [
+    ...todos[editingTodoIndex].attachments,
+    ...editTempAttachments
+  ];
 
   // Cancella vecchia notifica e crea nuova
   cancelNotification(todos[editingTodoIndex].id);
@@ -423,6 +437,7 @@ confirmEditBtn.addEventListener("click", () => {
   editModal.style.display = "none";
   editingTodoIndex = null;
   editTempChecklistItems = [];
+  resetEditTempAttachments(); // Reset attachments
 
   resetEditForm();
   saveAndRender();
@@ -434,6 +449,7 @@ editModal.addEventListener("click", (e) => {
     editModal.style.display = "none";
     editingTodoIndex = null;
     editTempChecklistItems = [];
+    resetEditTempAttachments(); // Reset attachments
   }
 });
 
@@ -509,5 +525,23 @@ document.addEventListener("click", (e) => {
       const menuBtn = item.querySelector(".menu-btn");
       if (menuBtn) menuBtn.blur();
     });
+  }
+});
+
+// ===== EVENT LISTENERS FILE ATTACHMENTS =====
+const taskFileInput = document.getElementById("task-file-input");
+const editFileInput = document.getElementById("edit-file-input");
+
+taskFileInput?.addEventListener("change", (e) => {
+  if (e.target.files && e.target.files.length > 0) {
+    handleFileAdd(e.target.files);
+    e.target.value = ""; // Reset input per permettere ri-selezione stesso file
+  }
+});
+
+editFileInput?.addEventListener("change", (e) => {
+  if (e.target.files && e.target.files.length > 0) {
+    handleEditFileAdd(e.target.files);
+    e.target.value = ""; // Reset input per permettere ri-selezione stesso file
   }
 });

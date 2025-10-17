@@ -329,6 +329,18 @@
         <label for="enable-checklist">Crea come checklist di attività</label>
       </div>
 
+      <!-- Allega File/Foto -->
+      <div class="file-attachment-section">
+        <label for="task-file-input" class="file-input-label">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+          </svg>
+          📎 Allega file/foto
+        </label>
+        <input type="file" id="task-file-input" multiple accept="image/*,.pdf,.doc,.docx,.txt" style="display: none;">
+        <div id="task-file-preview" class="file-preview-list"></div>
+      </div>
+
       <!-- Ricorrenza -->
       <div class="recurrence-selector">
         <label>Ricorrenza:</label>
@@ -376,6 +388,10 @@
         <div id="detail-checklist" class="detail-checklist" style="display: none;">
           <h4>Attività:</h4>
           <div id="detail-checklist-items"></div>
+        </div>
+        <div id="detail-attachments" class="detail-attachments" style="display: none;">
+          <h4>📎 File allegati:</h4>
+          <div id="detail-attachments-list" class="attachments-grid"></div>
         </div>
       </div>
     </div>
@@ -491,6 +507,18 @@
           </div>
           <div id="edit-checklist-list"></div>
         </div>
+
+        <!-- Allega File/Foto -->
+        <div class="file-attachment-section">
+          <label for="edit-file-input" class="file-input-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+            </svg>
+            📎 Allega file/foto
+          </label>
+          <input type="file" id="edit-file-input" multiple accept="image/*,.pdf,.doc,.docx,.txt" style="display: none;">
+          <div id="edit-file-preview" class="file-preview-list"></div>
+        </div>
       </div>
       <div class="modal-buttons">
         <button id="cancel-edit">Annulla</button>
@@ -558,6 +586,18 @@
     </div>
   </div>
 
+  <!-- Modale Generica Conferma/Alert -->
+  <div id="generic-modal" class="modal generic-modal" style="display: none;">
+    <div class="modal-content generic-modal-content">
+      <div class="generic-modal-icon"></div>
+      <h3 id="generic-modal-title"></h3>
+      <p id="generic-modal-message"></p>
+      <div class="modal-buttons" id="generic-modal-buttons">
+        <!-- I bottoni verranno inseriti dinamicamente -->
+      </div>
+    </div>
+  </div>
+
   <!-- Template per Todo Item -->
   <template id="todo-item-template">
     <li class="todo-item" draggable="true">
@@ -618,6 +658,7 @@
   <script src="js/constants.js"></script>
   <script src="js/state.js"></script>
   <script src="js/utils.js"></script>
+  <script src="js/file-attachments.js"></script>
   <script src="js/notifications.js"></script>
   <script src="js/search.js"></script>
   <script src="js/priority.js"></script>

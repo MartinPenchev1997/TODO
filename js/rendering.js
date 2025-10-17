@@ -178,6 +178,15 @@ function createTodoElement(todo) {
     priorityContainer.appendChild(recurrenceBadge);
   }
 
+  // Aggiungi badge attachments
+  if (todo.attachments && todo.attachments.length > 0) {
+    const attachmentBadge = document.createElement("span");
+    attachmentBadge.className = "attachment-indicator";
+    attachmentBadge.innerHTML = `📎 ${todo.attachments.length}`;
+    attachmentBadge.title = `${todo.attachments.length} file allegati`;
+    priorityContainer.appendChild(attachmentBadge);
+  }
+
   const todoTime = li.querySelector(".todo-time");
   todoTime.textContent = todo.time || "00:00";
 

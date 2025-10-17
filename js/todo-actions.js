@@ -63,6 +63,10 @@ function editTodo(index) {
   editChecklistContainer.style.display = editTempChecklistItems.length > 0 ? 'block' : 'none';
   renderEditChecklistItems();
   
+  // Reset attachments temporanei (gli esistenti sono già nel todo)
+  editTempAttachments = [];
+  renderEditFilePreview();
+  
   // Mostra modale
   editModal.style.display = 'flex';
 }

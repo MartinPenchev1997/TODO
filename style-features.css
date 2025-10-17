@@ -345,6 +345,24 @@
   margin-left: 2px;
 }
 
+/* Attachment Badge */
+.attachment-indicator {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  font-size: 13px;
+  opacity: 0.8;
+  padding: 2px 6px;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 4px;
+  color: var(--primary);
+  cursor: help;
+}
+
+.todo-item.completed .attachment-indicator {
+  opacity: 0.5;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 600px) {
   .search-sort-bar {
@@ -470,4 +488,390 @@
   85% { transform: translateX(5px); }
   90% { transform: translateX(-5px); }
   95% { transform: translateX(5px); }
+}
+
+/* ===== FILE ATTACHMENTS STYLES ===== */
+.file-attachment-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.file-input-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--card-bg);
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 14px;
+  color: var(--text);
+}
+
+.file-input-label:hover {
+  border-color: var(--primary);
+  background: var(--hover);
+}
+
+.file-input-label svg {
+  flex-shrink: 0;
+}
+
+.file-preview-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.file-preview-item {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  background: var(--card-bg);
+}
+
+.file-preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.file-preview-item.file-doc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  text-align: center;
+}
+
+.file-doc svg {
+  margin-bottom: 8px;
+}
+
+.file-doc-name {
+  font-size: 10px;
+  color: var(--text-light);
+  word-break: break-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.file-remove-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: var(--transition);
+  z-index: 2;
+}
+
+.file-remove-btn:hover {
+  background: rgb(220, 38, 38);
+  transform: scale(1.1);
+}
+
+/* Badge per file esistenti e nuovi in edit */
+.file-saved-badge,
+.file-new-badge {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: bold;
+  z-index: 2;
+}
+
+.file-saved-badge {
+  background: rgba(34, 197, 94, 0.9);
+  color: white;
+}
+
+.file-new-badge {
+  background: rgba(99, 102, 241, 0.9);
+  color: white;
+}
+
+.existing-attachment {
+  border-color: rgba(34, 197, 94, 0.5);
+}
+
+.new-attachment {
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+/* Attachments Grid in Detail Modal */
+.attachments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.attachment-item {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  background: var(--card-bg);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.attachment-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.attachment-item img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+
+.attachment-item.file-doc {
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  text-align: center;
+}
+
+.attachment-name {
+  font-size: 11px;
+  color: var(--text);
+  margin-top: 8px;
+  word-break: break-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.attachment-delete-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.95);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: var(--transition);
+  opacity: 0;
+  z-index: 3;
+}
+
+.attachment-item:hover .attachment-delete-btn {
+  opacity: 1;
+}
+
+.attachment-delete-btn:hover {
+  background: rgb(220, 38, 38);
+  transform: scale(1.15);
+}
+
+/* File viewer overlay */
+.file-viewer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.9);
+  z-index: 10001;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-viewer-overlay.active {
+  display: flex;
+}
+
+.file-viewer-content {
+  max-width: 90vw;
+  max-height: 90vh;
+  position: relative;
+}
+
+.file-viewer-content img {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+}
+
+.file-viewer-close {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: white;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.file-viewer-close:hover {
+  transform: scale(1.1);
+  background: var(--danger);
+  color: white;
+}
+
+.detail-attachments {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.detail-attachments h4 {
+  margin-bottom: 12px;
+  color: var(--text);
+  font-size: 16px;
+}
+
+/* ===== GENERIC MODAL (CONFIRM/ALERT) ===== */
+.generic-modal .modal-content {
+  max-width: 420px;
+  text-align: center;
+  padding: 32px 24px 24px;
+  border-radius: 16px;
+}
+
+.generic-modal-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  animation: iconPop 0.3s ease;
+}
+
+@keyframes iconPop {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.generic-modal-icon.warning::before {
+  content: '⚠️';
+}
+
+.generic-modal-icon.error::before {
+  content: '❌';
+}
+
+.generic-modal-icon.success::before {
+  content: '✅';
+}
+
+.generic-modal-icon.info::before {
+  content: 'ℹ️';
+}
+
+.generic-modal-icon.question::before {
+  content: '❓';
+}
+
+.generic-modal-icon.trash::before {
+  content: '🗑️';
+}
+
+#generic-modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+#generic-modal-message {
+  font-size: 15px;
+  color: var(--text-light);
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+#generic-modal-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+#generic-modal-buttons button {
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  min-width: 100px;
+}
+
+.btn-confirm {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-confirm:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+}
+
+.btn-danger:hover {
+  background: rgb(220, 38, 38);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+.btn-cancel {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-cancel:hover {
+  background: var(--hover);
+  border-color: var(--text-light);
 }

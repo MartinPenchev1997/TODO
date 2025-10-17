@@ -46,5 +46,8 @@ function showTodoDetail(todoIndex) {
     detailChecklist.style.display = 'none';
   }
   
+  // Mostra attachments
+  renderDetailAttachments(todo);
+  
   detailModal.style.display = 'flex';
 }
